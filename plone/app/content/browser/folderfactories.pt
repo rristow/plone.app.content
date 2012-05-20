@@ -36,35 +36,27 @@
         </p>
 
         <metal:addlist define-macro="addlist">
-
-            <form name="quickAdd" method="post" 
-                tal:attributes="action string:${context/absolute_url}/@@folder_factories">
-
-                <dl>
-                    <tal:typelist repeat="item view/addable_types">
-                        <dt>
-                            <input type="radio" name="url"
-                                   tal:attributes="value item/action;
-                                                   id string:form-field-${item/extra/id}" />
-                            <label tal:attributes="class string:contenttype-${item/extra/id};
-                                                   for string:form-field-${item/extra/id};">
-                                <img tal:attributes="src item/icon" alt="" />
-                                <span tal:replace="item/title">Type title</span>
-                            </label>
-                        </dt>
-                        <dd tal:content="item/description">Type description</dd>
-                    </tal:typelist>
-                </dl>
-
-                <div class="formControls">
-                    <input class="standalone"
-                          type="submit"
-                          value="Add"
-                          name="form.button.Add"
-                          i18n:attributes="value label_add"
-                          />
-                </div>
-            </form>
+            <dl tal:define="authenticator context/@@authenticator/authenticator">
+                <tal:typelist repeat="item view/addable_types">
+                    <dt>
+                        <label tal:attributes="class string:contenttype-${item/extra/id};
+                                               for string:form-field-${item/extra/id};">
+                            <img tal:attributes="src item/icon" alt="" />
+                            <span tal:replace="item/title">Type title</span>
+                            <form name="quickAdd" method="post" style="display:inline"
+                                tal:attributes="action string:${item/action};">
+                                <input type="hidden" tal:replace="structure authenticator" />
+                                <input class="standalone"
+                                  type="submit"
+                                  value="Add"
+                                  name="form.button.Add"
+                                  i18n:attributes="value label_add" />
+                            </form>
+                        </label>
+                    </dt>
+                    <dd tal:content="item/description">Type description</dd>
+                </tal:typelist>
+            </dl>
         </metal:addlist>
     </div>
 

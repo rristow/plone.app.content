@@ -23,17 +23,10 @@ class FolderFactoriesView(BrowserView):
     """The folder_factories view - show addable types
     """
 
-    def __call__(self):
-        if 'form.button.Add' in self.request.form:
-            url = self.request.form.get('url')
-            self.request.response.redirect(url)
-            return ''
-        else:
-            return self.index()
-
     def can_constrain_types(self):
         constrain_types = ISelectableConstrainTypes(self.add_context(), None)
-        return constrain_types is not None and constrain_types.canConstrainTypes()
+        can_constrain = constrain_types.canConstrainTypes()
+        return constrain_types is not None and can_constrain
 
     @memoize
     def add_context(self):
