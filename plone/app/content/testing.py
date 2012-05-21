@@ -61,6 +61,9 @@ class PloneAppContent(PloneSandboxLayer):
             ['Manager'],
             [],
         )
+        workflowTool = getToolByName(portal, 'portal_workflow')
+        workflowTool.setDefaultChain('simple_publication_workflow')
+
 
 PLONE_APP_CONTENT_FIXTURE = PloneAppContent()
 PLONE_APP_CONTENT_INTEGRATION_TESTING = IntegrationTesting(

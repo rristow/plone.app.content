@@ -8,6 +8,7 @@ Viewing the folder contents
 
 A user should first login before being able to access the folder contents view.
  
+  >>> from plone.app.content.browser.foldercontents import _action_method_identifier
   >>> browser.open('http://nohost/plone/@@folder_contents')
   >>> 'Login Name' in browser.contents
   True
@@ -225,7 +226,7 @@ we clean up all items by removing everything.
 
   >>> browser.getLink(id='foldercontents-selectall').click()
   >>> browser.getLink(id='foldercontents-selectall-completebatch').click()
-  >>> browser.getControl(name='folder_delete:method').click()
+  >>> browser.getControl(name='folder_delete' + _action_method_identifier).click()
 
 Notice that is no way to select any items now. This is because there
 is nothing to select.
@@ -283,7 +284,7 @@ Now lets click it.
 
   >>> browser.getLink('Up one level').click()
   >>> browser.url
-  'http://nohost/plone/folder_contents'
+  'http://nohost/plone/@@folder_contents'
 
 In the site root we should not be able to go up any further.
 
@@ -304,7 +305,7 @@ Before we demonstrate we need to clear out the existing contents and
 create some new content.
 
   >>> browser.getLink(id='foldercontents-selectall').click()
-  >>> browser.getControl(name='folder_delete:method').click()
+  >>> browser.getControl(name='folder_delete' + _action_method_identifier).click()
 
 Putting only one page into the folder will not show the option to
 disable batching since there is no batching.
@@ -320,7 +321,7 @@ Create some more pages to show the batch disabling feature.
 
   >>> browser.open('http://nohost/plone/@@folder_contents')
   >>> browser.getLink(id='foldercontents-selectall').click()
-  >>> browser.getControl(name='folder_delete:method').click()
+  >>> browser.getControl(name='folder_delete' + _action_method_identifier).click()
   >>> self.createDocuments(60)
 
 Now we can show all the items in the folder if we want to.

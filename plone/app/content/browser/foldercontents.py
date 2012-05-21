@@ -60,15 +60,16 @@ class FolderContentsView(BrowserView):
                 elif name.endswith(_action_view_identifier):
                     actionname = name.replace(_action_view_identifier, '')
                     break
-            if action:
-                # A skin layer action, use it with restrictedTraverse
-                return self.context.restrictedTraverse(str(actionname))()
-            else:
-                # If it's not a skin layer, we'll assume it's a view
-                # that needs to be called
-                view = getMultiAdapter((self.context, self.request),
-                                       name=actionname)
-                return view()
+            if actionname is not None:
+                if action:
+                    # A skin layer action, use it with restrictedTraverse
+                    return self.context.restrictedTraverse(str(actionname))()
+                else:
+                    # If it's not a skin layer, we'll assume it's a view
+                    # that needs to be called
+                    view = getMultiAdapter((self.context, self.request),
+                                           name=actionname)
+                    return view()
         return self.index()
 
     def contents_table(self):

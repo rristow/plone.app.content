@@ -289,6 +289,7 @@ class ContentUtilViews(BrowserView):
         plone_utils = getToolByName(context, 'plone_utils')
         orig_template = req.get('orig_template', None)
         change_template = paths and orig_template is not None
+        message = None
         if change_template:
             # We were called by 'object_rename'.  So now we take care that the
             # user is redirected to the object with the new id.
