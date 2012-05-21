@@ -53,7 +53,7 @@
              class="link-parent"
              tal:define="parent_url view/parent_url"
              tal:condition="parent_url"
-             tal:attributes="href string:${parent_url}/folder_contents"
+             tal:attributes="href string:${parent_url}/@@folder_contents"
              i18n:translate="go_to_parent_url">
               Up one level
           </a>
@@ -61,7 +61,7 @@
           <form name="folderContentsForm"
                 method="post"
                 action="folder_object"
-                tal:attributes="action context/absolute_url"
+                tal:attributes="action string:${context/absolute_url}/@@folder_contents"
                 class="kssattr-serveraction-foldercontents_update_table">
             <div tal:replace="structure view/contents_table"></div>
             <input tal:replace="structure context/@@authenticator/authenticator" />

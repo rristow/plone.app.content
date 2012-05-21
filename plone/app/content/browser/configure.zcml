@@ -86,4 +86,44 @@
         permission="zope2.View"
         />
 
+    <browser:page
+        for="*"
+        name="folder_delete"
+        class=".utils.ContentUtilViews"
+        attribute="folder_delete"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for="*"
+        name="folder_cut"
+        class=".utils.ContentUtilViews"
+        attribute="folder_cut"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for="*"
+        name="folder_paste"
+        class=".utils.ContentUtilViews"
+        attribute="folder_paste"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for="*"
+        name="folder_copy"
+        class=".utils.ContentUtilViews"
+        attribute="folder_copy"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for="*"
+        name="folder_rename"
+        class=".utils.ContentUtilViews"
+        attribute="folder_rename"
+        permission="zope2.View"
+        />
+
 </configure>

@@ -19,6 +19,16 @@ from plone.app.content.browser.interfaces import IContentsPage
 from plone.app.content.browser.tableview import Table, TableBrowserView
 
 
+_action_method_identifier = '_FORM_METHOD'
+_action_view_identifier = '_VIEW'
+
+_views_now = (
+    'folder_copy',
+    'folder_cut',
+    'folder_paste',
+    'folder_delete')
+
+
 class FolderContentsView(BrowserView):
     """
     """
@@ -27,6 +37,39 @@ class FolderContentsView(BrowserView):
     def __init__(self, context, request):
         super(FolderContentsView, self).__init__(context, request)
         alsoProvides(request, IContentsPage)
+
+    def __call__(self):
+        req = self.request
+        if req.get('REQUEST_METHOD', 'GET') == 'POST':
+            auth = getMultiAdapter((self.context, self.request),
+                                   name="authenticator")
+            if not auth.verify():
+                raise Unauthorized
+            action = False
+            actionname = None
+            # XXX Hacking here...
+            # need to find the action and normalize it so we can
+            # actually perform it.
+            for name in req.form.keys():
+                if name.endswith(_action_method_identifier):
+                    action = True
+                    actionname = name.replace(_action_method_identifier, '')
+                    if actionname in _views_now:
+                        action = False
+                    break
+                elif name.endswith(_action_view_identifier):
+                    actionname = name.replace(_action_view_identifier, '')
+                    break
+            if action:
+                # A skin layer action, use it with restrictedTraverse
+                return self.context.restrictedTraverse(str(actionname))()
+            else:
+                # If it's not a skin layer, we'll assume it's a view
+                # that needs to be called
+                view = getMultiAdapter((self.context, self.request),
+                                       name=actionname)
+                return view()
+        return self.index()
 
     def contents_table(self):
         table = FolderContentsTable(aq_inner(self.context), self.request)
@@ -255,6 +298,13 @@ class FolderContentsTable(object):
             # Make proper classes for our buttons
             if button['id'] != 'paste' or context.cb_dataValid():
                 buttons.append(self.setbuttonclass(button))
+            # XXX HACK! so can manually handle these methods
+            url = button['url']
+            if ':method' in url:
+                url = url.replace(':method', _action_method_identifier)
+            else:
+                url += _action_view_identifier
+            button['url'] = url
         return buttons
 
     def setbuttonclass(self, button):
