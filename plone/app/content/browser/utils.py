@@ -70,6 +70,8 @@ class ContentUtilViews(BrowserView):
                     context.absolute_url()))
                 plone_utils.addPortalMessage(message)
             except CopyError:
+                import traceback
+                print traceback.format_exc()
                 message = _(u'${title} is not moveable.',
                     mapping={u'title': title})
                 plone_utils.addPortalMessage(message, 'error')
