@@ -10,13 +10,30 @@
         class=".adding.CMFAdding"
         permission="cmf.AddPortalContent"
         />
+        
+        
+    <!-- File views -->
+    <browser:page
+        for="*"
+        name="file_view"
+        template="templates/file_view.pt"
+        permission="zope2.View"
+        />
 
+    <!-- Image views -->
+        <browser:page
+        for="*"
+        name="image_view"
+        template="templates/image_view.pt"
+        permission="zope2.View"
+        />
+        
     <!-- Folder contents -->
     <browser:page
         for="*"
         class=".foldercontents.FolderContentsView"
         name="folder_contents"
-        template="folder_contents.pt"
+        template="templates/folder_contents.pt"
         permission="cmf.ListFolderContents" />
 
     <browser:page
@@ -35,7 +52,7 @@
         for="*"
         class=".reviewlist.FullReviewListView"
         name="full_review_list"
-        template="full_review_list.pt"
+        template="templates/full_review_list.pt"
         permission="cmf.ReviewPortalContent" />
 
     <browser:page
@@ -50,7 +67,7 @@
         for="*"
         name="folder_factories"
         class=".folderfactories.FolderFactoriesView"
-        template="folderfactories.pt"
+        template="templates/folderfactories.pt"
         permission="cmf.AddPortalContent"
         />
 
@@ -58,7 +75,7 @@
     <browser:page
         for="*"
         name="select_default_page"
-        template="select_default_page.pt"
+        template="templates/select_default_page.pt"
         permission="cmf.ModifyPortalContent" />
 
     <!-- Select default page view -->
@@ -67,5 +84,8 @@
         name="default_page_selection"
         class=".default_page_selection.DefaultPageSelectionView"
         permission="cmf.ModifyPortalContent" />
+        
+        
+    
 
 </configure>

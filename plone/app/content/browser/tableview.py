@@ -96,7 +96,7 @@ class Table(object):
         map(self.set_checked, b)
         return b
 
-    render = ViewPageTemplateFile("table.pt")
+    render = ViewPageTemplateFile("templates/table.pt")
 
     def batching(self):
         return TableBatchView(self.context, self.request)(self.batch)
