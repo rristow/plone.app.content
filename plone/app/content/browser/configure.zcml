@@ -85,6 +85,15 @@
         class=".default_page_selection.DefaultPageSelectionView"
         permission="cmf.ModifyPortalContent" />
 
+    <!-- Constrain types -->
+    <browser:page
+        for="*"
+        name="folder_constraintypes_form"
+        class=".constraintypes.ConstrainTypesView"
+        template="constraintypes.pt"
+        permission="cmf.ModifyPortalContent"
+        />
+
     <!-- Send a URL to a friend -->
     <browser:page
         for="*"
