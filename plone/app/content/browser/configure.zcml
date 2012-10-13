@@ -88,4 +88,13 @@
         
     
 
+    <!-- Send a URL to a friend -->
+    <browser:page
+        for="*"
+        name="sendto"
+        class=".sendto.SendToView"
+        template="sendto_form.pt"
+        permission="plone.AllowSendTo"
+        />
+
 </configure>
