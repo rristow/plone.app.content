@@ -101,6 +101,7 @@
         class=".sendto.SendToView"
         template="templates/sendto_form.pt"
         permission="plone.AllowSendTo"
+        />
 
     <browser:page
         for="*"
