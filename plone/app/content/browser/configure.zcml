@@ -71,7 +71,6 @@
         permission="cmf.AddPortalContent"
         />
 
-<<<<<<< Updated upstream
     <!-- Select default page view -->
     <browser:page
         for="*"
