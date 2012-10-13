@@ -28,6 +28,13 @@
         permission="zope2.View"
         />
         
+    <browser:page
+        for="*"
+        name="image_view_fullscreen"
+        template="templates/image_view_fullscreen.pt"
+        permission="zope2.View"
+        />
+
     <!-- Folder contents -->
     <browser:page
         for="*"
@@ -103,11 +110,88 @@
         permission="plone.AllowSendTo"
         />
 
+    <!-- Cut Action -->
     <browser:page
         for="*"
         name="object_cut"
         class=".object_cut.ObjectCut"
         permission="zope2.CopyOrMove"
+        />
+
+    <!-- Discussion -->
+    <browser:page
+        for="*"
+        name="discussionitem_view"
+        template="templates/discussionitem_view.pt"
+        permission="zope2.View"
+        />
+
+    <!-- Document View -->
+    <browser:page
+        for="*"
+        name="document_view"
+        template="templates/document_view.pt"
+        permission="zope2.View"
+        />
+
+    <!-- Event -->
+    <browser:page
+        for="*"
+        name="event_view"
+        template="templates/event_view.pt"
+        permission="zope2.View"
+        />
+
+    <!-- Folder -->
+    <browser:page
+        for="*"
+        name="folder_full_view"
+        template="templates/folder_full_view.pt"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for="*"
+        name="folder_full_view_item"
+        template="templates/folder_full_view_item.pt"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for="*"
+        name="folder_listing"
+        template="templates/folder_listing.pt"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for="*"
+        name="folder_summary_view"
+        template="templates/folder_summary_view.pt"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        for="*"
+        name="folder_tabular_view"
+        template="templates/folder_tabular_view.pt"
+        permission="zope2.View"
+        />
+
+    <!-- Link -->
+    <browser:page
+        for="*"
+        name="link_view"
+        template="templates/link_view.pt"
+        permission="zope2.View"
+        />
+
+    <!-- News Item -->
+    <browser:page
+        for="*"
+        name="newsitem_view"
+        template="templates/newsitem_view.pt"
+        permission="zope2.View"
         />
 
 </configure>

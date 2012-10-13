@@ -4,7 +4,7 @@
       xmlns:metal="http://xml.zope.org/namespaces/metal"
       xml:lang="en" lang="en"
       i18n:domain="plone"
-      metal:use-macro="here/main_template/macros/master">
+      metal:use-macro="view/context/main_template/macros/master">
 
   <head>
       <metal:block fill-slot="top_slot">
@@ -21,28 +21,28 @@
   <body>
 
       <metal:content-title fill-slot="content-title">
-          <h1 class="documentFirstHeading"> 
-              <tal:block condition="exists:here/aq_explicit/widget">
-                  <metal:field use-macro="python:here.widget('title', mode='view')">
+          <h1 class="documentFirstHeading">
+              <tal:block condition="exists:view/context/aq_explicit/widget">
+                  <metal:field use-macro="python:view.context.widget('title', mode='view')">
                   Title
                   </metal:field>
               </tal:block>
-              <tal:block condition="not:exists:here/aq_explicit/widget">
+              <tal:block condition="not:exists:view/context/aq_explicit/widget">
                   <span tal:content="view/title" tal:omit-tag="">Directory Id</span>
               </tal:block>
-          </h1>        
+          </h1>
       </metal:content-title>
-      
+
       <metal:content-description fill-slot="content-description">
-          <div class="documentDescription" tal:condition="exists:here/aq_explicit/widget">
-              <metal:field use-macro="python:here.widget('description', mode='view')">
+          <div class="documentDescription" tal:condition="exists:view/context/aq_explicit/widget">
+              <metal:field use-macro="python:view.context.widget('description', mode='view')">
                   Description
               </metal:field>
           </div>
-          <tal:block condition="not:exists:here/aq_explicit/widget">
-              <div class="documentDescription" 
-                         tal:content="context/Description" 
-                         tal:condition="context/Description"> 
+          <tal:block condition="not:exists:view/context/aq_explicit/widget">
+              <div class="documentDescription"
+                         tal:content="context/Description"
+                         tal:condition="context/Description">
                   Description
               </div>
           </tal:block>
@@ -67,6 +67,6 @@
             <input tal:replace="structure context/@@authenticator/authenticator" />
           </form>
       </metal:content-core>
-      
+
   </body>
 </html>

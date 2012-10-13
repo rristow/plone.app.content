@@ -19,9 +19,9 @@
                      checkPermission nocall: context/portal_membership/checkPermission;
                      site_properties context/portal_properties/site_properties;
                      item_type context/portal_type;
-                     item_layout here/getLayout;
+                     item_layout view/context/getLayout;
                      override python: {'Link': 'link_view'};
-                     item_macro python:path('here/%s/macros/content-core | nothing' % override.get(item_type, item_layout));
+                     item_macro python:path('view/context/%s/macros/content-core | nothing' % override.get(item_type, item_layout));
                      use_view_action site_properties/typesUseViewActionInListings|python:();
                      item_url context/absolute_url;
                      normalizeString nocall: context/plone_utils/normalizeString;
@@ -34,7 +34,7 @@
 
         <h2 class="headline">
             <a href="#" class="summary url" tal:content="context/Title"
-               tal:attributes="href python:test(item_type in use_view_action, item_url+'/view', item_url);">
+               tal:attributes="href python:(item_type in use_view_action) and (item_url+'/view') or item_url;">
                Title or id
              </a>
         </h2>
@@ -65,9 +65,9 @@
 
         <p class="more" tal:condition="python:not(item_macro) or rendering_error">
             <a href=""
-               tal:attributes="href python:test(item_type in use_view_action, item_url+'/view', item_url);"> 
-               <span class="hiddenStructure"><span tal:replace="context/Title" /> - </span> 
-               <span i18n:translate="read_more">Read More&hellip;</span> 
+               tal:attributes="href python:(item_type in use_view_action) and (item_url+'/view') or item_url;">
+               <span class="hiddenStructure"><span tal:replace="context/Title" /> - </span>
+               <span i18n:translate="read_more">Read More&hellip;</span>
             </a>
         </p>
 

@@ -24,7 +24,7 @@
             </a>
 
             <span class="discreet visualNoPrint"
-                  tal:define="objectsize python:context.getObjSize(here)">
+                  tal:define="objectsize python:context.getObjSize(view.context)">
 
               <span tal:condition="size"
 	                class="discreet">
