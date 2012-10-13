@@ -68,4 +68,12 @@
         class=".default_page_selection.DefaultPageSelectionView"
         permission="cmf.ModifyPortalContent" />
 
+    <!-- Send a URL to a friend -->
+    <browser:page
+        for="*"
+        name="sendto"
+        class=".sendto.SendToView"
+        permission="plone.AllowSendTo"
+        />
+
 </configure>
