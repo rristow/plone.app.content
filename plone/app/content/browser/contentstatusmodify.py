@@ -3,11 +3,14 @@ from DateTime import DateTime
 from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone import PloneMessageFactory as _
 from Products.CMFPlone.utils import transaction_note
+from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from ZODB.POSException import ConflictError
 from zope.publisher.browser import BrowserView
 
 
 class ContentStatusModifyView(BrowserView):
+
+    template = ViewPageTemplateFile('content_status_history.pt')
 
     def __init__(self, context, request):
         super(ContentStatusModifyView, self).__init__(context, request)
@@ -23,6 +26,10 @@ class ContentStatusModifyView(BrowserView):
 
     def __call__(self, workflow_action=None, comment='', effective_date=None,
                  expiration_date=None, *args):
+
+        errors = self.validate(workflow_action)
+        if errors or self.request.get('paths', None):
+            return self.template(options=errors)
 
         if workflow_action in self.transition_ids \
             and not effective_date \
@@ -75,9 +82,9 @@ class ContentStatusModifyView(BrowserView):
                 pass
 
         self.context.plone_utils.addPortalMessage(_(u'Item state changed.'))
-        #return state.set(context=wfcontext)
+
         return self.request.RESPONSE.redirect(
-            wfcontext.absolute_url())
+            "%s/view" % wfcontext.absolute_url())
 
     def editContent(self, obj, effective, expiry):
         kwargs = {}
@@ -89,3 +96,19 @@ class ContentStatusModifyView(BrowserView):
         if expiry and (isinstance(expiry, DateTime) or len(expiry) > 5):
             kwargs['expiration_date'] = expiry
         self.new_context.plone_utils.contentEdit(obj, **kwargs)
+
+    def validate(self, workflow_action=''):
+        errors = {}
+
+        if not workflow_action:
+            errors = dict(
+                workflow_action=_(
+                    u'This field is required, please provide some '
+                    u'information.'))
+                # 'workflow_missing')
+
+        if errors:
+            self.context.plone_utils.addPortalMessage(
+                _(u'Please correct the indicated errors.'),
+                'error')
+        return errors
