@@ -71,6 +71,7 @@
         permission="cmf.AddPortalContent"
         />
 
+<<<<<<< Updated upstream
     <!-- Select default page view -->
     <browser:page
         for="*"
@@ -101,6 +102,12 @@
         class=".sendto.SendToView"
         template="templates/sendto_form.pt"
         permission="plone.AllowSendTo"
+
+    <browser:page
+        for="*"
+        name="object_cut"
+        class=".object_cut.ObjectCut"
+        permission="zope2.CopyOrMove"
         />
 
 </configure>
