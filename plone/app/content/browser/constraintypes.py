@@ -1,8 +1,9 @@
+from AccessControl import Unauthorized
 from Acquisition import aq_inner
 from zope.publisher.browser import BrowserView
 from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone import PloneMessageFactory as _
-from zope.component import queryMultiAdapter
+from zope.component import getMultiAdapter
 
 
 class ConstrainTypesView(BrowserView):
@@ -13,6 +14,11 @@ class ConstrainTypesView(BrowserView):
 
     def __call__(self):
         if 'form.button.Save' in self.request.form:
+            authenticator = getMultiAdapter((self.context, self.request),
+                                            name=u"authenticator")
+            if not authenticator.verify():
+                raise Unauthorized
+
             self.set_constrain_types()
             plone_utils = getToolByName(self.context, 'plone_utils')
             if self.errors:
@@ -21,8 +27,8 @@ class ConstrainTypesView(BrowserView):
                 return self.index()
 
             plone_utils.addPortalMessage(_(u'Changes made.'))
-            context_state = queryMultiAdapter((self.context, self.request),
-                                              name=u'plone_context_state')
+            context_state = getMultiAdapter((self.context, self.request),
+                                            name=u'plone_context_state')
             url = context_state.view_url()
             self.request.response.redirect(url)
             return ''
