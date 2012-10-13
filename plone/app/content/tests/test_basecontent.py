@@ -2,7 +2,7 @@ import unittest, doctest
 
 from Testing import ZopeTestCase as ztc
 
-from base import ContentFunctionalTestCase
+from plone.app.content.testing import ContentFunctionalTestCase
 
 def test_suite():
     return unittest.TestSuite((
