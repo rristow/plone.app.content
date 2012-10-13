@@ -54,12 +54,27 @@
         permission="cmf.AddPortalContent"
         />
 
-    <!-- Content status modify -->
+    <!-- Content status history -->
+    <browser:page
+        for="*"
+        name="content_status_history"
+        class=".contentstatushistory.ContentStatusHistoryView"
+        permission="cmf.AddPortalContent"
+        />
+
     <browser:page
         for="*"
         name="content_status_modify"
-        class=".contentstatusmodify.ContentStatusModifyView"
-        template="folderfactories.pt"
+        class=".contentstatushistory.ContentStatusHistoryView"
+        attribute="content_status_modify"
+        permission="cmf.AddPortalContent"
+        />
+
+    <browser:page
+        for="*"
+        name="folder_publish"
+        class=".contentstatushistory.ContentStatusHistoryView"
+        attribute="folder_publish"
         permission="cmf.AddPortalContent"
         />
 

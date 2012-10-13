@@ -93,9 +93,10 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
 
         # folder_publish requires a non-GET request
         self.setRequestMethod('POST')
-        self.folder.folder_publish(workflow_action='publish',
-                                   paths=paths,
-                                   include_children=True)
+        self.folder.restrictedTraverse('@@folder_publish')(
+            workflow_action='publish',
+            paths=paths,
+            include_children=True)
         for o in (self.folder.d1, self.folder.f1, self.folder.f1.d2,
                   self.folder.f1.f2):
             self.assertEqual(self.workflow.getInfoFor(o, 'review_state'),
@@ -113,11 +114,12 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
 
         # folder_publish requires a non-GET request
         self.setRequestMethod('POST')
-        self.folder.folder_publish(workflow_action='publish',
-                                   paths=paths,
-                                   effective_date='1/1/2001',
-                                   expiration_date='1/2/2001',
-                                   include_children=True)
+        self.folder.restrictedTraverse('@@folder_publish')(
+            workflow_action='publish',
+            paths=paths,
+            effective_date='1/1/2001',
+            expiration_date='1/2/2001',
+            include_children=True)
         for o in (self.folder.d1, self.folder.f1, self.folder.f1.d2,
                   self.folder.f1.f2):
             self.assertEqual(self.workflow.getInfoFor(o, 'review_state'),
@@ -136,9 +138,10 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
 
         # folder_publish requires a non-GET request
         self.setRequestMethod('POST')
-        self.folder.folder_publish(workflow_action='publish',
-                                   paths=paths,
-                                   include_children=False)
+        self.folder.restrictedTraverse('@@folder_publish')(
+            workflow_action='publish',
+            paths=paths,
+            include_children=False)
         for o in (self.folder.d1, self.folder.f1):
             self.assertEqual(self.workflow.getInfoFor(o, 'review_state'),
                              'published')

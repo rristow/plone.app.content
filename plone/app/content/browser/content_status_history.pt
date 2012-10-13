@@ -32,8 +32,8 @@
       path of the context is used.
     </tal:comment>
 
-    <metal:main fill-slot="main"
-         tal:define="errors options/state/getErrors;
+      <metal:main fill-slot="main"
+           tal:define="errors options/errors | python: {};
                      review_state context/@@plone_context_state/workflow_state;
                      paths python:request.get('paths', ['/'.join(context.getPhysicalPath())]);
                      batch python:context.getObjectsFromPathList(paths, batch=False);
@@ -58,13 +58,12 @@
       </div>
 
       <div id="content-core">
-
           <form id="edit_form"
                 class="enableAutoFocus"
                 name="edit_form"
                 method="post"
                 action="content_status_modify"
-                tal:attributes="action string:${context/@@plone_context_state/object_url}/${template/getId}"
+                tal:attributes="action string:${context/@@plone_context_state/object_url}/${view/__name__}"
                 tal:condition="not:python:paths and not batch">
 
               <div class="field" tal:condition="batch">
@@ -133,7 +132,7 @@
                                            browserDefaultResult context/browserDefault;
                                            isBrowserDefault     python:len(browserDefaultResult[1]) == 1 and item.id == context.browserDefault()[1][0];
                                            item_folderish       item/is_folderish|nothing"
-                               tal:attributes="class python:test(oddrow, 'draggable even', 'draggable odd');
+                               tal:attributes="class python:oddrow and 'draggable even' or 'draggable odd';
                                                id string:folder-contents-item-${item_id};" >
 
                                <td class="notDraggable">
@@ -143,15 +142,15 @@
                                           value="#"
                                           tal:attributes="value   item_path;
                                                           id      string:cb_$item_id;
-                                                          checked python:test(request.get('ids_checked', False), 'checked', None);
+                                                          checked python:request.get('ids_checked', False) and 'checked' or None;
                                                           alt     string:Select $item_title_or_id;
                                                           title   string:Select $item_title_or_id" />
                               <input type="hidden" name="obj_paths:list" value="#"
                                      tal:attributes="value item_rel_url" />
 
                             </td>
-                            <td tal:define="url python:test(item_use_view, item_url+'/view',
-                                            test(item_folderish, item_url+'/folder_contents', item_url+'/'));">
+                            <td tal:define="url python:item_use_view and item_url+'/view' or
+                                            (item_folderish and item_url+'/folder_contents'or item_url+'/');">
                                     <img tal:replace="structure item_icon/html_tag" />
                                     <a href="#" tal:attributes="href  url;
                                                               title string:$item_type: $item_description;
@@ -228,9 +227,9 @@
 
                 <div tal:define="inputname  string:effective_date;
                                  formname   string:edit_form;
-                                 effective python:test(request.get('paths'), None, context.EffectiveDate()) ;
-                                 inputvalue python:test(effective and effective!='None', effective, request.get('effective_date', ''));"
-                     tal:attributes="class python:test(error, 'field error', 'field')">
+                                 effective python:request.get('paths') and None or context.EffectiveDate() ;
+                                 inputvalue python:(effective and effective!='None') and effective or request.get('effective_date', '');"
+                     tal:attributes="class python:error and 'field error' or 'field'">
 
                   <div metal:use-macro="context/calendar_macros/macros/calendarDatePickerBox">
                     calendar pop-up
@@ -255,8 +254,8 @@
                   <div tal:define="inputname  string:expiration_date;
                                    formname   string:edit_form;
                                    expiration context/ExpirationDate;
-                                   inputvalue python:test(expiration and expiration!='None', expiration, request.get('expiration_date', ''));"
-                       tal:attributes="class python:test(error, 'field error', 'field')">
+                                   inputvalue python:(expiration and expiration!='None') and expiration or request.get('expiration_date', '');"
+                       tal:attributes="class python:error and 'field error' or 'field'">
 
                     <div metal:use-macro="context/calendar_macros/macros/calendarDatePickerBox">
                       calendar pop-up
@@ -292,8 +291,8 @@
 
                 <div tal:define="error_workflow_action errors/workflow_action|nothing;
                                  objs request/paths|nothing;
-                                 target python:test(objs, objs, context);"
-                     tal:attributes="class python:test(error_workflow_action, 'field error', 'field')">
+                                 target python:objs and objs or context;"
+                     tal:attributes="class python:error_workflow_action and 'field error' or 'field'">
 
                   <div tal:condition="error_workflow_action">
                     <tal:block content="error_workflow_action">Error</tal:block>
@@ -315,7 +314,7 @@
                          value=""
                          tal:attributes="value review_state;
                                          title review_state;
-                                         checked python:test(request.get('workflow_action', review_state)==review_state,1,0);" />
+                                         checked python:request.get('workflow_action', review_state)==review_state and 1 or 0;" />
                   <label for="workflow_action"
                          i18n:translate="label_no_change">No change</label>
                   <br />
@@ -332,7 +331,7 @@
                              tal:attributes="value transition/id;
                                              id    transition/id;
                                              title transition/name;
-                                             checked python:test(transition.get('id') == request.get('workflow_action', ''), 'checked', None)" />
+                                             checked python:transition.get('id') == request.get('workflow_action', '') and 'checked' or None" />
                       <label for=""
                              i18n:translate=""
                              tal:attributes="for transition/id;"
