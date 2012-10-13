@@ -54,4 +54,18 @@
         permission="cmf.AddPortalContent"
         />
 
+    <!-- Select default page view -->
+    <browser:page
+        for="*"
+        name="select_default_page"
+        template="select_default_page.pt"
+        permission="cmf.ModifyPortalContent" />
+
+    <!-- Select default page view -->
+    <browser:page
+        for="*"
+        name="default_page_selection"
+        class=".default_page_selection.DefaultPageSelectionView"
+        permission="cmf.ModifyPortalContent" />
+
 </configure>
