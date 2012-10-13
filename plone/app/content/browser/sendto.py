@@ -1,3 +1,4 @@
+from AccessControl import Unauthorized
 from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone import PloneMessageFactory as _
 from Products.CMFPlone.utils import transaction_note
@@ -15,7 +16,10 @@ class SendToView(BrowserView):
         if self.request.get('REQUEST_METHOD') != 'POST':
             # Simply display the form.
             return self.index()
-
+        authenticator = getMultiAdapter(
+            (self.context, self.request), name=u"authenticator")
+        if not authenticator.verify():
+            raise Unauthorized
         # Validate the form
         self.errors = self.validate()
         if self.errors:
