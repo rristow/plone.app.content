@@ -59,7 +59,7 @@
         for="*"
         name="content_status_history"
         class=".contentstatushistory.ContentStatusHistoryView"
-        permission="cmf.RequestReview"
+        permission="cmf.ModifyPortalContent"
         />
 
     <!-- Content status modify -->
@@ -67,7 +67,7 @@
         for="*"
         name="content_status_modify"
         class=".contentstatusmodify.ContentStatusModifyView"
-        permission="cmf.RequestReview"
+        permission="cmf.ModifyPortalContent"
         />
 
     <!-- Folder publish -->
@@ -75,7 +75,7 @@
         for="*"
         name="folder_publish"
         class=".folderpublish.FolderPublishView"
-        permission="cmf.RequestReview"
+        permission="cmf.ModifyPortalContent"
         />
 
 </configure>

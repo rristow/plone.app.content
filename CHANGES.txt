@@ -4,6 +4,11 @@ Changelog
 2.1a2 (unreleased)
 ------------------
 
+- Implement content status modify functionality with
+  BrowserViews. Add tests for the content_status_history
+  form. 
+  [mathias.leimgruber]
+
 - Remove KSS dependency from AJAX table views.
   [cah190]
 
