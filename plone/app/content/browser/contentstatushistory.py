@@ -24,14 +24,23 @@ class ContentStatusHistoryView(BrowserView):
                  effective_date=None, expiration_date=None,
                  include_children=False, *args):
 
-        if self.request.get('form.button.FolderPublish', None) or self.__name__ == 'content_status_modify':
+        if self.request.get('form.button.Cancel', None):
+            return self.request.RESPONSE.redirect(
+                "%s/view" % self.context.absolute_url())
+
+        is_modify_view = self.__name__ == 'content_status_modify'
+        is_history_view = self.__name__ == 'content_status_history'
+        is_fpublish_view = self.__name__ == 'folder_publish'
+
+        if self.request.get('FolderPublish', None) or is_modify_view:
             self.content_status_modify(
                 workflow_action=workflow_action,
                 comment=comment,
                 effective_date=effective_date,
                 expiration_date=expiration_date)
 
-        if (self.request.get('form.button.FolderPublish', None) and self.__name__ == 'content_status_history') or self.__name__ == 'folder_publish':
+        if (self.request.get('form.button.FolderPublish', None)
+                and is_history_view) or is_fpublish_view:
             self.folder_publish(
                 workflow_action=workflow_action,
                 paths=paths,
@@ -40,19 +49,15 @@ class ContentStatusHistoryView(BrowserView):
                 effective_date=effective_date,
                 include_children=include_children)
 
-        if self.request.get('form.button.Cancel', None):
-            return self.request.RESPONSE.redirect(
-                "%s/view" % self.context.absolute_url())
-
         return self.template()
 
     def content_status_modify(self, workflow_action=None, comment='',
                               effective_date=None, expiration_date=None,
                               *args):
 
-        self.validate(workflow_action)
+        self.validate_modify(workflow_action)
         if self.errors:
-            return self.template(options=self.errors)
+            return self.template()
 
         self.new_context = self.context.portal_factory.doCreate(self.context)
         portal_workflow = self.new_context.portal_workflow
@@ -127,37 +132,40 @@ class ContentStatusHistoryView(BrowserView):
             kwargs['expiration_date'] = expiry
         self.new_context.plone_utils.contentEdit(obj, **kwargs)
 
-    def validate(self, workflow_action=''):
-
+    def validate_modify(self, workflow_action=''):
         if not workflow_action:
             self.errors['workflow_action'] = u'This field is required, '
             u'please provide some information.'
-            # 'workflow_missing')
 
         if self.errors:
             self.context.plone_utils.addPortalMessage(
                 _(u'Please correct the indicated errors.'),
                 'error')
 
+    def validate_history(self, workflow_action=None, paths=[]):
+        if workflow_action is None:
+            self.errors['workflow_action'] = _(
+                u'You must select a publishing action.')
+
+        if not paths:
+            self.errors['paths'] = _(
+                u'You must select content to change.')
+
     def folder_publish(self, workflow_action=None, paths=[],
                        comment='No comment',
                        expiration_date=None, effective_date=None,
                        include_children=False):
 
-        if workflow_action is None:
-            self.errors['workflow_action'] = _(
-                u'You must select a publishing action.')
-            return
+        self.validate_history(workflow_action=workflow_action,
+                              paths=paths)
 
-        if not paths:
-            self.errors['paths'] = _(
-                u'You must select content to change.')
-            return
+        if self.errors:
+            return self.template()
 
         failed = self.plone_utils.transitionObjectsByPaths(
             workflow_action, paths, comment,
             expiration_date, effective_date,
-            include_children, handle_errors=False, REQUEST=self.request,)
+            include_children, REQUEST=self.request,)
 
         transaction_note(str(paths) + ' transitioned ' + workflow_action)
 

@@ -156,8 +156,8 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
         self.assertEqual(self.workflow.getInfoFor(self.folder, 'review_state'),
                          'visible')
         self.assertEqual(
-                    self.workflow.getInfoFor(self.folder.d1, 'review_state'),
-                    'published')
+            self.workflow.getInfoFor(self.folder.d1, 'review_state'),
+            'published')
 
     def testPublishingDefaultPagePublishesFolder(self):
         self.setRoles(['Manager'])  # Make sure we can publish directly
@@ -167,8 +167,8 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
         self.assertEqual(self.workflow.getInfoFor(self.folder, 'review_state'),
                          'published')
         self.assertEqual(
-                    self.workflow.getInfoFor(self.folder.d1, 'review_state'),
-                    'published')
+            self.workflow.getInfoFor(self.folder.d1, 'review_state'),
+            'published')
 
     def testPublishingDefaultPageWhenFolderCannotBePublished(self):
         self.setRoles(['Manager'])  # Make sure we can publish directly
@@ -183,35 +183,39 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
         self.assertEqual(self.workflow.getInfoFor(self.folder, 'review_state'),
                          'published')
         self.assertEqual(
-                    self.workflow.getInfoFor(self.folder.d1, 'review_state'),
-                    'published')
+            self.workflow.getInfoFor(self.folder.d1, 'review_state'),
+            'published')
 
     # test setting effective/expiration date and isExpired script
 
     def testIsExpiredWithExplicitExpiredContent(self):
         self.setRoles(['Manager'])
         self.folder.invokeFactory('Document', id='d1', title='Doc 1')
-        self.folder.d1.restrictedTraverse('content_status_modify')(workflow_action='publish',
-                                             effective_date='1/1/2001',
-                                             expiration_date='1/2/2001')
+        self.folder.d1.restrictedTraverse('content_status_modify')(
+            workflow_action='publish',
+            effective_date='1/1/2001',
+            expiration_date='1/2/2001')
         self.assertTrue(self.portal.isExpired(self.folder.d1))
 
     def testIsExpiredWithImplicitExpiredContent(self):
         self.setRoles(['Manager'])
         self.folder.invokeFactory('Document', id='d1', title='Doc 1')
-        self.folder.d1.restrictedTraverse('content_status_modify')(workflow_action='publish',
-                                             effective_date='1/1/2001',
-                                             expiration_date='1/2/2001')
+        self.folder.d1.restrictedTraverse('content_status_modify')(
+            workflow_action='publish',
+            effective_date='1/1/2001',
+            expiration_date='1/2/2001')
         self.assertTrue(self.folder.d1.isExpired())
 
     def testIsExpiredWithExplicitNonExpiredContent(self):
         self.setRoles(['Manager'])
         self.folder.invokeFactory('Document', id='d1', title='Doc 1')
-        self.folder.d1.restrictedTraverse('content_status_modify')(workflow_action='publish')
+        self.folder.d1.restrictedTraverse('content_status_modify')(
+            workflow_action='publish')
         self.assertFalse(self.portal.isExpired(self.folder.d1))
 
     def testIsExpiredWithImplicitNonExpiredContent(self):
         self.setRoles(['Manager'])
         self.folder.invokeFactory('Document', id='d1', title='Doc 1')
-        self.folder.d1.restrictedTraverse('content_status_modify')(workflow_action='publish')
+        self.folder.d1.restrictedTraverse('content_status_modify')(
+            workflow_action='publish')
         self.assertFalse(self.folder.d1.isExpired())

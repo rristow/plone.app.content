@@ -59,23 +59,25 @@
         for="*"
         name="content_status_history"
         class=".contentstatushistory.ContentStatusHistoryView"
-        permission="cmf.AddPortalContent"
+        permission="cmf.RequestReview"
         />
 
+    <!-- Content status modify -->
     <browser:page
         for="*"
         name="content_status_modify"
         class=".contentstatushistory.ContentStatusHistoryView"
         attribute="content_status_modify"
-        permission="cmf.AddPortalContent"
+        permission="cmf.RequestReview"
         />
 
+    <!-- Folder publish -->
     <browser:page
         for="*"
         name="folder_publish"
         class=".contentstatushistory.ContentStatusHistoryView"
         attribute="folder_publish"
-        permission="cmf.AddPortalContent"
+        permission="cmf.RequestReview"
         />
 
 </configure>
