@@ -193,6 +193,7 @@
         name="newsitem_view"
         template="templates/newsitem_view.pt"
         permission="zope2.View"
+        />
 
     <!-- Content status history -->
     <browser:page
