@@ -37,7 +37,7 @@ class ContentStatusHistoryView(BrowserView):
                 expiration_date=expiration_date)
 
         if self.request.get('form.button.FolderPublish', None):
-            self.restricedTraverse('folder_publish')(
+            self.context.restrictedTraverse('folder_publish')(
                 workflow_action=workflow_action,
                 paths=paths,
                 comment=comment,

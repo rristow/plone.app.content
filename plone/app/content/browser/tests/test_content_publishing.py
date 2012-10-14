@@ -1,10 +1,10 @@
-#
-# Tests security of content publishing operations
-# code inspired by Ween
-#
-
+# -*- coding: utf-8 -*-
 from Products.CMFPlone.tests import PloneTestCase
+from Products.Five.testbrowser import Browser
 from Products.PloneTestCase.PloneTestCase import FunctionalTestCase
+from Products.PloneTestCase.PloneTestCase import setupPloneSite
+from transaction import commit
+
 
 text = """I lick my brain in silence
 Rather squeeze my head instead
@@ -220,3 +220,106 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
         self.folder.d1.restrictedTraverse('content_status_modify')(
             workflow_action='publish')
         self.assertFalse(self.folder.d1.isExpired())
+
+
+setupPloneSite()
+
+
+class TestContentStatusHistoryForm(FunctionalTestCase):
+    def afterSetUp(self):
+        super(TestContentStatusHistoryForm, self).afterSetUp()
+        portal = self.portal
+        self.setRoles(['Manager', ])
+        self.workflow = portal.portal_workflow
+        self.uf = self.portal.acl_users
+        self.uf.userFolderAddUser('manager', 'secret', ['Manager'], [])
+        self.folder = portal[portal.invokeFactory(id='folder',
+                                                  type_name='Folder')]
+        # Create some content
+        self.folder.invokeFactory(id='doc1',
+                                  type_name="Document")
+        self.folder.invokeFactory(id='doc2',
+                                  type_name="Document")
+        commit()
+        self.browser = Browser()
+
+    def _login(self):
+        self.browser.addHeader('Authorization', 'Basic %s:%s' % (
+                               'manager', 'secret'))
+
+    def test_content_status_modify_no_transition(self):
+        self._login()
+        self.browser.open('%s/content_status_modify' %
+                          self.folder.absolute_url())
+
+        # There should be a status message
+        self.assertIn('portalMessage error',
+                      self.browser.contents)
+
+    def test_content_status_history_single_item(self):
+        self._login()
+        self.browser.open('%s/content_status_history' %
+                          self.folder.doc1.absolute_url())
+
+        self.browser.getControl(name='workflow_action').getControl(
+            value='publish').click()
+
+        self.browser.getControl(name='form.button.Publish').click()
+
+        self.assertEqual(
+            self.workflow.getInfoFor(self.folder.doc1, 'review_state'),
+            'published')
+        self.assertIn('Item state changed.', self.browser.contents)
+
+    def test_content_status_history_multible_items(self):
+        self._login()
+        self.browser.open('%s/folder_contents' %
+                          self.folder.absolute_url())
+
+        # Go to folder_contents, choose both items and go ahead to
+        # the content_status_history
+        self.browser.getControl(name='paths:list').getControl(
+            value='/plone/folder/doc1').click()
+        self.browser.getControl(name='paths:list').getControl(
+            value='/plone/folder/doc2').click()
+        self.browser.getControl(name='content_status_history:method').click()
+        self.assertIn(
+            'form.button.FolderPublish', self.browser.contents)
+
+        # First unselect both items and try to submit
+        self.browser.getControl(name='paths:list').getControl(
+            value='/plone/folder/doc1').click()
+        self.browser.getControl(name='paths:list').getControl(
+            value='/plone/folder/doc2').click()
+
+        self.browser.getControl(name='workflow_action').getControl(
+            value='publish').click()
+
+        self.browser.getControl(name='form.button.FolderPublish').click()
+
+        self.assertEqual(
+            self.workflow.getInfoFor(self.folder.doc1, 'review_state'),
+            'visible')
+        self.assertEqual(
+            self.workflow.getInfoFor(self.folder.doc2, 'review_state'),
+            'visible')
+
+        # Status error message
+        self.assertIn('Please correct the indicated errors.',
+                      self.browser.contents)
+        # Field error message
+        self.assertIn('You must select content to change.',
+                      self.browser.contents)
+
+        # Second submit form with items
+        self.browser.getControl(name='form.button.FolderPublish').click()
+
+        self.assertEqual(
+            self.workflow.getInfoFor(self.folder.doc1, 'review_state'),
+            'published')
+        self.assertEqual(
+            self.workflow.getInfoFor(self.folder.doc2, 'review_state'),
+            'published')
+
+        # Status info message
+        self.assertIn('Item state changed.', self.browser.contents)
