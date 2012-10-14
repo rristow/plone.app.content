@@ -10,8 +10,8 @@
         class=".adding.CMFAdding"
         permission="cmf.AddPortalContent"
         />
-        
-        
+
+
     <!-- File views -->
     <browser:page
         for="*"
@@ -27,7 +27,7 @@
         template="templates/image_view.pt"
         permission="zope2.View"
         />
-        
+
     <browser:page
         for="*"
         name="image_view_fullscreen"
@@ -181,7 +181,8 @@
     <!-- Link -->
     <browser:page
         for="*"
-        name="link_view"
+        class=".linkview.LinkRedirectView"
+        name="link_redirect_view"
         template="templates/link_view.pt"
         permission="zope2.View"
         />
