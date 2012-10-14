@@ -66,8 +66,7 @@
     <browser:page
         for="*"
         name="content_status_modify"
-        class=".contentstatushistory.ContentStatusHistoryView"
-        attribute="content_status_modify"
+        class=".contentstatusmodify.ContentStatusModifyView"
         permission="cmf.RequestReview"
         />
 
@@ -75,8 +74,7 @@
     <browser:page
         for="*"
         name="folder_publish"
-        class=".contentstatushistory.ContentStatusHistoryView"
-        attribute="folder_publish"
+        class=".folderpublish.FolderPublishView"
         permission="cmf.RequestReview"
         />
 

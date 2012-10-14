@@ -4,6 +4,7 @@
 #
 
 from Products.CMFPlone.tests import PloneTestCase
+from Products.PloneTestCase.PloneTestCase import FunctionalTestCase
 
 text = """I lick my brain in silence
 Rather squeeze my head instead

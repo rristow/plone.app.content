@@ -66,8 +66,11 @@
                 tal:attributes="action string:${context/@@plone_context_state/object_url}/${view/__name__}"
                 tal:condition="not:python:paths and not batch">
 
-              <div class="field" tal:condition="batch">
+              <div class="field" tal:condition="batch" 
+                   tal:define="error errors/paths | nothing;"
+                   tal:attributes="class python:error and 'field error' or 'field'">
                 <label i18n:translate="label_affected_content">Affected content</label>
+                <div tal:content="error">Validation error output</div>
                 <div tal:define="dummy python:request.set('ids_checked', 1);
                                  use_view_action site_properties/typesUseViewActionInListings|python:();">
                   <table id="sortable"
@@ -147,6 +150,8 @@
                                                           title   string:Select $item_title_or_id" />
                               <input type="hidden" name="obj_paths:list" value="#"
                                      tal:attributes="value item_rel_url" />
+                              <input type="hidden" name="orig_paths:list" value="#"
+                                     tal:attributes="value item_path" />
 
                             </td>
                             <td tal:define="url python:item_use_view and item_url+'/view' or
