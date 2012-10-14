@@ -193,6 +193,29 @@
         name="newsitem_view"
         template="templates/newsitem_view.pt"
         permission="zope2.View"
+
+    <!-- Content status history -->
+    <browser:page
+        for="*"
+        name="content_status_history"
+        class=".contentstatushistory.ContentStatusHistoryView"
+        permission="cmf.ModifyPortalContent"
+        />
+
+    <!-- Content status modify -->
+    <browser:page
+        for="*"
+        name="content_status_modify"
+        class=".contentstatusmodify.ContentStatusModifyView"
+        permission="cmf.ModifyPortalContent"
+        />
+
+    <!-- Folder publish -->
+    <browser:page
+        for="*"
+        name="folder_publish"
+        class=".folderpublish.FolderPublishView"
+        permission="cmf.ModifyPortalContent"
         />
 
 </configure>
