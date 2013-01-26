@@ -162,6 +162,8 @@
         name="folder_listing"
         template="templates/folder_listing.pt"
         permission="zope2.View"
+        menu="plone_displayviews"
+        title="Standard view"
         />
 
     <browser:page
