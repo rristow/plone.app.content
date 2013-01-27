@@ -2,6 +2,7 @@ Change Ownership Form
 =====================
 
   >>> browser = self.browser
+  >>> self.createFolder('test-folder')
 
 Add some mor users
 
@@ -9,6 +10,7 @@ Add some mor users
   <PloneUser 'additional-1'>
   >>> self.portal.acl_users._doAddUser('additional-2', 'secret', ['Manager'], [])
   <PloneUser 'additional-2'>
+  >>> import transaction; transaction.commit()
 
 
 Viewing the folder contents
@@ -16,32 +18,32 @@ Viewing the folder contents
 
 A user should first login before being able to access the changing ownership form
 
-  >>> browser.open('http://nohost/plone/news/@@ownership_form')
+  >>> browser.open('http://nohost/plone/test-folder/@@ownership_form')
   >>> 'Login Name' in browser.contents
   True
 
 Log in and try again.
 
-  >>> from Products.PloneTestCase.setup import portal_owner
-  >>> from Products.PloneTestCase.setup import default_password
+  >>> from plone.app.testing import TEST_USER_NAME
+  >>> from plone.app.testing import TEST_USER_PASSWORD
   >>> browser.addHeader('Authorization',
-  ...                   'Basic %s:%s' % (portal_owner, default_password))
+  ...                   'Basic %s:%s' % (TEST_USER_NAME, TEST_USER_PASSWORD))
   >>> browser.open('http://nohost/plone/@@ownership_form')
   >>> 'Login Name' in browser.contents
   False
 
-  >>> browser.open('http://nohost/plone/news/@@ownership_form')
+  >>> browser.open('http://nohost/plone/test-folder/@@ownership_form')
   >>> 'Login Name' in browser.contents
   False
 
 Create some test content and check the preselected value
 
-  >>> self.createFolder('test-folder')
   >>> folder = self.portal.get('test-folder')
   >>> folder.invokeFactory('Folder', 'subfolder')
   'subfolder'
   >>> folder.get('subfolder').__ac_local_roles__
   {'test_user_1_': ['Owner']}
+  >>> transaction.commit()
 
 
 Change the ownership without the subobjects

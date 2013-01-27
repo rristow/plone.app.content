@@ -6,7 +6,7 @@ from plone.app.testing import IntegrationTesting
 from plone.app.testing import FunctionalTesting
 
 from zope.configuration import xmlconfig
-from Products.PloneTestCase import PloneTestCase as ptc
+
 
 class PloneAppContent(PloneSandboxLayer):
 
@@ -69,12 +69,3 @@ PLONE_APP_CONTENT_INTEGRATION_TESTING = IntegrationTesting(
 PLONE_APP_CONTENT_FUNCTIONAL_TESTING = FunctionalTesting(
     bases=(PLONE_APP_CONTENT_FIXTURE,),
     name="PloneAppContent:Functional")
-
-
-class ContentTestCase(ptc.PloneTestCase):
-    
-    layer = PLONE_APP_CONTENT_INTEGRATION_TESTING
-
-class ContentFunctionalTestCase(ptc.FunctionalTestCase):
-    
-    layer = PLONE_APP_CONTENT_FUNCTIONAL_TESTING

@@ -2,6 +2,7 @@ Folder contents
 ===============
 
   >>> browser = self.browser
+  >>> self.createFolder('empty-folder')
 
 Viewing the folder contents
 ---------------------------
@@ -12,21 +13,21 @@ A user should first login before being able to access the folder contents view.
   >>> 'Login Name' in browser.contents
   True
 
-  >>> browser.open('http://nohost/plone/news/@@folder_contents')
+  >>> browser.open('http://nohost/plone/empty-folder/@@folder_contents')
   >>> 'Login Name' in browser.contents
   True
 
 Log in and try again.
 
-  >>> from Products.PloneTestCase.setup import portal_owner
-  >>> from Products.PloneTestCase.setup import default_password
+  >>> from plone.app.testing import TEST_USER_NAME
+  >>> from plone.app.testing import TEST_USER_PASSWORD
   >>> browser.addHeader('Authorization',
-  ...                   'Basic %s:%s' % (portal_owner, default_password))
+  ...                   'Basic %s:%s' % (TEST_USER_NAME, TEST_USER_PASSWORD))
   >>> browser.open('http://nohost/plone/@@folder_contents')
   >>> 'Login Name' in browser.contents
   False
 
-  >>> browser.open('http://nohost/plone/news/@@folder_contents')
+  >>> browser.open('http://nohost/plone/empty-folder/@@folder_contents')
   >>> 'Login Name' in browser.contents
   False
 
@@ -38,7 +39,6 @@ of content objects at once.
 
 An empty folder should only contain the paste button.
 
-  >>> self.createFolder('empty-folder')
   >>> browser.open('http://nohost/plone/empty-folder/@@folder_contents')
 
   >>> browser.getControl('Copy')

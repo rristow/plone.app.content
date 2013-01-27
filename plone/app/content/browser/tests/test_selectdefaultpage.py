@@ -1,10 +1,9 @@
-from Products.CMFCore.utils import getToolByName
-from Products.PloneTestCase.PloneTestCase import FunctionalTestCase
-from Products.PloneTestCase.PloneTestCase import setupPloneSite
-
-from Products.Five.testbrowser import Browser
-
-setupPloneSite()
+import transaction
+import unittest
+from plone.testing.z2 import Browser
+from plone.app.content.testing import PLONE_APP_CONTENT_FUNCTIONAL_TESTING
+from plone.app.testing import setRoles
+from plone.app.testing import TEST_USER_ID
 
 
 FOLDER = {'id': 'testfolder',
@@ -16,18 +15,21 @@ DOCUMENT = {'id': 'testdoc',
             'description': 'Test Document Description'}
 
 
-class SelectDefaultPageTestCase(FunctionalTestCase):
+class SelectDefaultPageTestCase(unittest.TestCase):
 
-    def afterSetUp(self):
-        super(SelectDefaultPageTestCase, self).afterSetUp()
+    layer = PLONE_APP_CONTENT_FUNCTIONAL_TESTING
 
+    def setUp(self):
+        self.portal = self.layer['portal']
         self.uf = self.portal.acl_users
         self.uf.userFolderAddUser('reviewer', 'secret', ['Reviewer'], [])
-        self.browser = Browser()
-        self.wftool = getToolByName(self.portal, 'portal_workflow')
+        self._create_structure()
+        transaction.commit()
+        self.browser = Browser(self.layer['app'])
+        self.browser.addHeader('Authorization',
+                               'Basic %s:%s' % ('reviewer', 'secret'))
 
     def _createFolder(self):
-        self.setRoles(['Manager'])
         self.portal.invokeFactory(id=FOLDER['id'], type_name='Folder')
         folder = getattr(self.portal, FOLDER['id'])
         folder.setTitle(FOLDER['title'])
@@ -38,7 +40,6 @@ class SelectDefaultPageTestCase(FunctionalTestCase):
         return folder
 
     def _createDocument(self, context):
-        self.setRoles(['Manager'])
         context.invokeFactory(id=DOCUMENT['id'], type_name='Document')
         doc = getattr(context, DOCUMENT['id'])
         doc.setTitle(DOCUMENT['title'])
@@ -49,57 +50,38 @@ class SelectDefaultPageTestCase(FunctionalTestCase):
         return doc
 
     def _create_structure(self):
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         folder = self._createFolder()
-        self.wftool.doActionFor(folder, 'publish')
-
-        doc = self._createDocument(folder)
-        self.wftool.doActionFor(doc, 'publish')
+        self._createDocument(folder)
         return folder
 
     def test_select_default_page_view(self):
-        '''
-        Check that the select_default_page view is shown
-        '''
-        folder = self._create_structure()
+        """Check that the form can be rendered."""
+        folder = self.portal.testfolder
 
-        self.browser.addHeader('Authorization',
-                               'Basic %s:%s' % ('reviewer', 'secret'))
         self.browser.open('%s/@@select_default_page' % folder.absolute_url())
 
         self.assertTrue('Select default page' in self.browser.contents)
         self.assertTrue('id="testdoc"' in self.browser.contents)
 
     def test_default_page_action_cancel(self):
-        '''
-        check that the select_default_page view cancel button brings you
-        back to the folder view
-        '''
-        folder = self._create_structure()
+        """Check the Cancel action."""
+        folder = self.portal.testfolder
 
-        self.browser.addHeader('Authorization',
-                               'Basic %s:%s' % ('reviewer', 'secret'))
         self.browser.open('%s/@@select_default_page' % folder.absolute_url())
-
         cancel_button = self.browser.getControl('Cancel')
         cancel_button.click()
 
         self.assertTrue(self.browser.url == folder.absolute_url())
-        self.assertTrue(FOLDER['description'] in self.browser.contents)
+        self.assertFalse(hasattr(folder, 'default_page'))
 
     def test_default_page_action_save(self):
-        '''
-        check that the select_default_page view submit button brings you back
-        to the folder view but seeing the document
-        '''
-        folder = self._create_structure()
-
-        self.browser.addHeader('Authorization',
-                               'Basic %s:%s' % ('reviewer', 'secret'))
+        """Check the Save action."""
+        folder = self.portal.testfolder
         self.browser.open('%s/@@select_default_page' % folder.absolute_url())
 
         submit_button = self.browser.getControl('Save')
         submit_button.click()
 
         self.assertTrue(self.browser.url == folder.absolute_url())
-        self.assertTrue(DOCUMENT['description'] in self.browser.contents)
-        self.assertFalse(FOLDER['description'] in self.browser.contents)
+        self.assertEqual(folder.default_page, 'testdoc')

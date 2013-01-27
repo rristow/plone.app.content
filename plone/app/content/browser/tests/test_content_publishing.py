@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
-from Products.CMFPlone.tests import PloneTestCase
-from Products.Five.testbrowser import Browser
-from Products.PloneTestCase.PloneTestCase import FunctionalTestCase
-from Products.PloneTestCase.PloneTestCase import setupPloneSite
-from transaction import commit
-
+from plone.app.content.testing import PLONE_APP_CONTENT_FUNCTIONAL_TESTING
+from plone.app.testing import setRoles
+from plone.app.testing import TEST_USER_ID
+from plone.testing.z2 import Browser
+import transaction
+import unittest
 
 text = """I lick my brain in silence
 Rather squeeze my head instead
@@ -38,7 +37,7 @@ props = {'description': 'song by ween',
          'subject': ['psychedelic', 'pop', '13th floor elevators']}
 
 
-class TestContentPublishing(PloneTestCase.PloneTestCase):
+class TestContentPublishing(unittest.TestCase):
     """ The instant publishing drop down UI.
         !NOTE! CMFDefault.Document overrides setFormat and Format
         so it acts strangely.  This is also hardcoded to work with Document.
@@ -49,13 +48,34 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
         folder_publish behaviour have been added, since this seems a logical
         place to keep them.
     """
+    layer = PLONE_APP_CONTENT_FUNCTIONAL_TESTING
 
-    def afterSetUp(self):
+    def setUp(self):
+        self.portal = self.layer['portal']
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
+        self.folder = self.portal[self.portal.invokeFactory('Folder', 'folder')]
         self.portal.acl_users._doAddUser('user1', 'secret', ['Member'], [])
         self.membership = self.portal.portal_membership
-        self.createMemberarea('user1')
         self.workflow = self.portal.portal_workflow
+        self.workflow.setDefaultChain('plone_workflow')
+        transaction.commit()
         self.setupAuthenticator()
+
+    def setRequestMethod(self, method):
+        app = self.layer['app']
+        app.REQUEST.set('REQUEST_METHOD', method)
+        app.REQUEST.method = method
+
+    def getAuthenticator(self):
+        from plone.protect.authenticator import AuthenticatorView
+        from re import match
+        tag = AuthenticatorView('context', 'request').authenticator()
+        pattern = '<input .*name="(\w+)".*value="(\w+)"'
+        return match(pattern, tag).groups()
+
+    def setupAuthenticator(self):
+        name, token = self.getAuthenticator()
+        self.layer['app'].REQUEST.form[name] = token
 
     def _checkMD(self, obj, **changes):
         """ check the DublinCore Metadata on obj - it must inherit from
@@ -81,7 +101,7 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
             props.update(_orig_props)
 
     def testPublishingSubobjects(self):
-        self.setRoles(['Manager'])  # Make sure we can publish directly
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.folder.invokeFactory('Document', id='d1', title='Doc 1')
         self.folder.invokeFactory('Folder', id='f1', title='Folder 1')
         self.folder.f1.invokeFactory('Document', id='d2', title='Doc 2')
@@ -102,7 +122,7 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
                              'published')
 
     def testPublishingSubobjectsAndExpireThem(self):
-        self.setRoles(['Manager'])  # Make sure we can publish directly
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.folder.invokeFactory('Document', id='d1', title='Doc 1')
         self.folder.invokeFactory('Folder', id='f1', title='Folder 1')
         self.folder.f1.invokeFactory('Document', id='d2', title='Doc 2')
@@ -126,7 +146,7 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
             self.assertTrue(self.portal.isExpired(o))
 
     def testPublishingWithoutSubobjects(self):
-        self.setRoles(['Manager'])  # Make sure we can publish directly
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.folder.invokeFactory('Document', id='d1', title='Doc 1')
         self.folder.invokeFactory('Folder', id='f1', title='Folder 1')
         self.folder.f1.invokeFactory('Document', id='d2', title='Doc 2')
@@ -150,7 +170,7 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
 
     def testFolderPublishing(self):
         # Make sure object gets published
-        self.setRoles(['Manager'])
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.folder.invokeFactory('Document', id='doc1')
         doc1 = self.folder.doc1
         doc_path = '/'.join(doc1.getPhysicalPath())
@@ -168,7 +188,7 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
         doc1 = self.folder.doc1
         doc_path = '/'.join(doc1.getPhysicalPath())
         self.setRequestMethod('POST')
-        self.setRoles(['Manager'])
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.folder.unrestrictedTraverse('@@folder_publish')(
             workflow_action='publish',
             paths=[doc_path])
@@ -186,7 +206,7 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
         paths = [doc1_path, '/garbage/path', doc2_path]
         self.setupAuthenticator()
         self.setRequestMethod('POST')
-        self.setRoles(['Manager'])
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.folder.unrestrictedTraverse('@@folder_publish')(
             workflow_action='publish',
             paths=paths)
@@ -214,7 +234,7 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
         doc1_path = '/'.join(self.folder.doc1.getPhysicalPath())
         self.setRequestMethod('POST')
         self.setupAuthenticator()
-        self.setRoles(['Manager'])
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.folder.unrestrictedTraverse('@@folder_publish')(
             workflow_action='publish',
             paths=[doc1_path])
@@ -236,7 +256,7 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
         doc2_path = '/'.join(self.folder.doc2.getPhysicalPath())
         self.setRequestMethod('POST')
         self.setupAuthenticator()
-        self.setRoles(['Manager'])
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.folder.unrestrictedTraverse('@@folder_publish')(
             workflow_action='publish',
             paths=[doc1_path, doc2_path])
@@ -257,7 +277,7 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
                 paths=['bogus'])
 
     def testPublishingNonDefaultPageLeavesFolderAlone(self):
-        self.setRoles(['Manager'])  # Make sure we can publish directly
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.folder.invokeFactory('Document', id='d1', title='Doc 1')
         self.folder.d1.restrictedTraverse('@@content_status_modify')('publish')
         self.assertEqual(self.workflow.getInfoFor(self.folder, 'review_state'),
@@ -267,7 +287,7 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
             'published')
 
     def testPublishingDefaultPagePublishesFolder(self):
-        self.setRoles(['Manager'])  # Make sure we can publish directly
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.folder.invokeFactory('Document', id='d1', title='Doc 1')
         self.folder.setDefaultPage('d1')
         self.folder.d1.restrictedTraverse('content_status_modify')('publish')
@@ -278,7 +298,7 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
             'published')
 
     def testPublishingDefaultPageWhenFolderCannotBePublished(self):
-        self.setRoles(['Manager'])  # Make sure we can publish directly
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.folder.invokeFactory('Document', id='d1', title='Doc 1')
         self.folder.setDefaultPage('d1')
         # make parent be published already when publishing its default document
@@ -296,7 +316,7 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
     # test setting effective/expiration date and isExpired script
 
     def testIsExpiredWithExplicitExpiredContent(self):
-        self.setRoles(['Manager'])
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.folder.invokeFactory('Document', id='d1', title='Doc 1')
         self.folder.d1.restrictedTraverse('content_status_modify')(
             workflow_action='publish',
@@ -305,7 +325,7 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
         self.assertTrue(self.portal.isExpired(self.folder.d1))
 
     def testIsExpiredWithImplicitExpiredContent(self):
-        self.setRoles(['Manager'])
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.folder.invokeFactory('Document', id='d1', title='Doc 1')
         self.folder.d1.restrictedTraverse('content_status_modify')(
             workflow_action='publish',
@@ -314,28 +334,28 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
         self.assertTrue(self.folder.d1.isExpired())
 
     def testIsExpiredWithExplicitNonExpiredContent(self):
-        self.setRoles(['Manager'])
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.folder.invokeFactory('Document', id='d1', title='Doc 1')
         self.folder.d1.restrictedTraverse('content_status_modify')(
             workflow_action='publish')
         self.assertFalse(self.portal.isExpired(self.folder.d1))
 
     def testIsExpiredWithImplicitNonExpiredContent(self):
-        self.setRoles(['Manager'])
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.folder.invokeFactory('Document', id='d1', title='Doc 1')
         self.folder.d1.restrictedTraverse('content_status_modify')(
             workflow_action='publish')
         self.assertFalse(self.folder.d1.isExpired())
 
-setupPloneSite()
 
+class TestContentStatusHistoryForm(unittest.TestCase):
+    layer = PLONE_APP_CONTENT_FUNCTIONAL_TESTING
 
-class TestContentStatusHistoryForm(FunctionalTestCase):
-    def afterSetUp(self):
-        super(TestContentStatusHistoryForm, self).afterSetUp()
-        portal = self.portal
-        self.setRoles(['Manager', ])
+    def setUp(self):
+        self.portal = portal = self.layer['portal']
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.workflow = portal.portal_workflow
+        self.workflow.setDefaultChain('plone_workflow')
         self.uf = self.portal.acl_users
         self.uf.userFolderAddUser('manager', 'secret', ['Manager'], [])
         self.folder = portal[portal.invokeFactory(id='folder',
@@ -345,8 +365,8 @@ class TestContentStatusHistoryForm(FunctionalTestCase):
                                   type_name="Document")
         self.folder.invokeFactory(id='doc2',
                                   type_name="Document")
-        commit()
-        self.browser = Browser()
+        transaction.commit()
+        self.browser = Browser(self.layer['app'])
 
     def _login(self):
         self.browser.addHeader('Authorization', 'Basic %s:%s' % (

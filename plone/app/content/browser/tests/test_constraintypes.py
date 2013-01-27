@@ -1,29 +1,24 @@
-# -*- coding: utf-8 -*-
+import transaction
 import unittest
-from transaction import commit
 
-from Products.CMFCore.utils import getToolByName
-
-from Products.PloneTestCase.PloneTestCase import FunctionalTestCase
-from Products.PloneTestCase.PloneTestCase import setupPloneSite
-
-from Products.Five.testbrowser import Browser
-
-setupPloneSite()
+from plone.testing.z2 import Browser
+from plone.app.testing import PLONE_FUNCTIONAL_TESTING
+from plone.app.testing import setRoles
+from plone.app.testing import TEST_USER_ID
 
 
-class TestConstrainTypes(FunctionalTestCase):
+class TestConstrainTypes(unittest.TestCase):
+    layer = PLONE_FUNCTIONAL_TESTING
 
-    def afterSetUp(self):
-        super(TestConstrainTypes, self).afterSetUp()
-        portal = self.portal
-        self.setRoles(['Manager',])
-        self.uf = self.portal.acl_users
+    def setUp(self):
+        portal = self.layer['portal']
+        setRoles(portal, TEST_USER_ID, ['Manager'])
+        self.uf = portal.acl_users
         self.uf.userFolderAddUser('manager', 'secret', ['Manager'], [])
-        self.folder = portal[portal.invokeFactory(id='folder',
-                                                  type_name='Folder')]
-        commit()
-        self.browser = Browser()
+        self.folder = portal[portal.invokeFactory(
+            id='folder', type_name='Folder')]
+        transaction.commit()
+        self.browser = Browser(self.layer['app'])
 
     def _open_form(self):
         self.browser.addHeader('Authorization', 'Basic %s:%s' % (

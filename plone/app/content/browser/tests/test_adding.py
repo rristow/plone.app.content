@@ -1,14 +1,14 @@
 import unittest
-
-from Acquisition import aq_get
-from Products.PloneTestCase import PloneTestCase as ptc
-
-ptc.setupPloneSite()
+from plone.app.testing import PLONE_INTEGRATION_TESTING
 
 
-class AddingTests(ptc.PloneTestCase):
+class AddingTests(unittest.TestCase):
+    layer = PLONE_INTEGRATION_TESTING
 
     def test_adding_acquisition(self):
+        from Acquisition import aq_get
+
+        self.portal = self.layer['portal']
         adding = self.portal.unrestrictedTraverse('+')
         # Check explicit Acquisition
         template = aq_get(adding, 'main_template')
@@ -19,7 +19,3 @@ class AddingTests(ptc.PloneTestCase):
         self.assertTrue(template)
         # Check traversal
         self.assertTrue(self.portal.unrestrictedTraverse('+/main_template'))
-
-
-def test_suite():
-    return unittest.makeSuite(AddingTests)

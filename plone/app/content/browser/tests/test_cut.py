@@ -1,18 +1,18 @@
 from plone.app.content.browser.tests.test_doctests import FolderTestCase
-import transaction
 from plone.locking.interfaces import ILockable
+import transaction
+
 
 def return_false(self, op=0):
-    """peter"""
     return 0
 
 
 class CutTestCase(FolderTestCase):
 
-    
     def setUp(self):
         super(CutTestCase, self).setUp()
         self.createDocuments(5)
+        transaction.commit()
 
     def test_unauthorized_cut(self):
         self.browser.open("http://nohost/plone/testing-1/object_cut")
@@ -27,6 +27,7 @@ class CutTestCase(FolderTestCase):
         portal = self.portal
         obj = portal['testing-3']
         obj._canCopy = return_false
+        transaction.commit()
         self.loginAsManager()
         self.browser.open("http://nohost/plone/testing-3/object_cut")
         self.assertTrue("is not moveable." in self.browser.contents)

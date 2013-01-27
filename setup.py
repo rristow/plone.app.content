@@ -24,7 +24,7 @@ setup(name='plone.app.content',
       extras_require=dict(
           test=[
             'zope.testing',
-            'Products.PloneTestCase',
+            'plone.app.testing',
           ]
       ),
       install_requires=[

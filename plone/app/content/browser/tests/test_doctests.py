@@ -1,60 +1,62 @@
 from zope.testing import doctest
+import transaction
+import unittest
 from unittest import TestSuite
-
+from plone.app.content.testing import PLONE_APP_CONTENT_FUNCTIONAL_TESTING
+from plone.app.testing import setRoles
+from plone.app.testing import TEST_USER_ID
 from Testing.ZopeTestCase import FunctionalDocFileSuite
-from Products.PloneTestCase.PloneTestCase import FunctionalTestCase
-from Products.PloneTestCase.PloneTestCase import setupPloneSite
 
-setupPloneSite()
 
 OPTIONFLAGS = (doctest.ELLIPSIS |
                doctest.NORMALIZE_WHITESPACE)
 
-class FolderTestCase(FunctionalTestCase):
+
+class FolderTestCase(unittest.TestCase):
     """base test case with convenience methods for all control panel tests"""
 
-    def afterSetUp(self):
-        super(FolderTestCase, self).afterSetUp()
-        from Products.Five.testbrowser import Browser
-        self.browser = Browser()
-        
+    layer = PLONE_APP_CONTENT_FUNCTIONAL_TESTING
+
+    def setUp(self):
+        from plone.testing.z2 import Browser
+        self.browser = Browser(self.layer['app'])
+        self.portal = self.layer['portal']
         self.uf = self.portal.acl_users
         self.uf.userFolderAddUser('root', 'secret', ['Manager'], [])
 
     def createDocuments(self, amount):
-        self.setRoles(['Manager',])
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         for i in xrange(1, amount + 1):
             self.portal.invokeFactory('Document', 'testing-%d' % i)
             document = getattr(self.portal, 'testing-%d' % i)
             document.setTitle(unicode('Testing \xc3\xa4 %d' % i, 'utf-8'))
             document.setExcludeFromNav(True)
             document.reindexObject()
+        transaction.commit()
 
     def createFolder(self, id='new-folder'):
-        self.setRoles(['Manager',])
+        setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.portal.invokeFactory(id=id, type_name='Folder')
         folder = getattr(self.portal, id)
         folder.setTitle('New Folder')
         folder.setExcludeFromNav(True)
         folder.reindexObject()
-
-    def createUser(self, userid):
-        registration = getToolByName(site, 'portal_registration')
-        return registration.addMember(userid, 'fakepw', ['Member',])
+        transaction.commit()
 
     def loginAsManager(self):
-        """points the browser to the login screen and logs in as user root with Manager role."""
         self.browser.open('http://nohost/plone/')
         self.browser.getLink('Log in').click()
         self.browser.getControl('Login Name').value = 'root'
         self.browser.getControl('Password').value = 'secret'
         self.browser.getControl('Log in').click()
 
+
 def test_suite():
     tests = ['foldercontents.txt', 'change_ownership.txt']
     suite = TestSuite()
     for test in tests:
-        suite.addTest(FunctionalDocFileSuite(test,
+        suite.addTest(FunctionalDocFileSuite(
+            test,
             optionflags=OPTIONFLAGS,
             package="plone.app.content.browser.tests",
             test_class=FolderTestCase))
