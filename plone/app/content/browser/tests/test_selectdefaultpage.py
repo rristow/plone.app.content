@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-import unittest
-
 from Products.CMFCore.utils import getToolByName
-
 from Products.PloneTestCase.PloneTestCase import FunctionalTestCase
 from Products.PloneTestCase.PloneTestCase import setupPloneSite
 
@@ -11,18 +7,16 @@ from Products.Five.testbrowser import Browser
 setupPloneSite()
 
 
-FOLDER = { 'id': 'testfolder',
-           'title': 'Test Folder',
-           'description': 'Test Folder Description'}
+FOLDER = {'id': 'testfolder',
+          'title': 'Test Folder',
+          'description': 'Test Folder Description'}
 
-DOCUMENT = { 'id': 'testdoc',
-             'title': 'Test Document',
-             'description': 'Test Document Description'}
+DOCUMENT = {'id': 'testdoc',
+            'title': 'Test Document',
+            'description': 'Test Document Description'}
 
 
 class SelectDefaultPageTestCase(FunctionalTestCase):
-    """
-    """
 
     def afterSetUp(self):
         super(SelectDefaultPageTestCase, self).afterSetUp()
@@ -33,7 +27,7 @@ class SelectDefaultPageTestCase(FunctionalTestCase):
         self.wftool = getToolByName(self.portal, 'portal_workflow')
 
     def _createFolder(self):
-        self.setRoles(['Manager',])
+        self.setRoles(['Manager'])
         self.portal.invokeFactory(id=FOLDER['id'], type_name='Folder')
         folder = getattr(self.portal, FOLDER['id'])
         folder.setTitle(FOLDER['title'])
@@ -44,7 +38,7 @@ class SelectDefaultPageTestCase(FunctionalTestCase):
         return folder
 
     def _createDocument(self, context):
-        self.setRoles(['Manager',])
+        self.setRoles(['Manager'])
         context.invokeFactory(id=DOCUMENT['id'], type_name='Document')
         doc = getattr(context, DOCUMENT['id'])
         doc.setTitle(DOCUMENT['title'])
@@ -56,10 +50,10 @@ class SelectDefaultPageTestCase(FunctionalTestCase):
 
     def _create_structure(self):
         folder = self._createFolder()
-        self.wftool.doActionFor(folder, 'submit')
+        self.wftool.doActionFor(folder, 'publish')
 
         doc = self._createDocument(folder)
-        self.wftool.doActionFor(doc, 'submit')
+        self.wftool.doActionFor(doc, 'publish')
         return folder
 
     def test_select_default_page_view(self):
@@ -86,7 +80,7 @@ class SelectDefaultPageTestCase(FunctionalTestCase):
                                'Basic %s:%s' % ('reviewer', 'secret'))
         self.browser.open('%s/@@select_default_page' % folder.absolute_url())
 
-        cancel_button = self.browser.getControl(name="form.button.Cancel")
+        cancel_button = self.browser.getControl('Cancel')
         cancel_button.click()
 
         self.assertTrue(self.browser.url == folder.absolute_url())
@@ -103,15 +97,9 @@ class SelectDefaultPageTestCase(FunctionalTestCase):
                                'Basic %s:%s' % ('reviewer', 'secret'))
         self.browser.open('%s/@@select_default_page' % folder.absolute_url())
 
-        submit_button = self.browser.getControl(name="form.button.Save")
+        submit_button = self.browser.getControl('Save')
         submit_button.click()
 
         self.assertTrue(self.browser.url == folder.absolute_url())
         self.assertTrue(DOCUMENT['description'] in self.browser.contents)
         self.assertFalse(FOLDER['description'] in self.browser.contents)
-
-
-def test_suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(SelectDefaultPageTestCase))
-    return suite
