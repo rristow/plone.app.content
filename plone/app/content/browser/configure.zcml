@@ -109,7 +109,7 @@
         for="*"
         name="object_cut"
         class=".object_cut.ObjectCut"
-        permission="zope2.CopyOrMove"
+        permission="zope2.DeleteObjects"
         />
 
     <!-- Discussion -->
