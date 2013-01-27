@@ -29,5 +29,7 @@ class FolderPublishView(BrowserView):
         # It is necessary to set the context to override context from
         # content_status_modify
         plone_utils.addPortalMessage(_(u'Item state changed.'))
-        return self.request.RESPONSE.redirect(
-            "%s/view" % self.context.absolute_url())
+        url = self.request.get('orig_template')
+        if url is None:
+            url = "%s/view" % self.context.absolute_url()
+        return self.request.RESPONSE.redirect(url)
