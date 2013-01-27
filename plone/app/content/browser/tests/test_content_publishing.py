@@ -80,8 +80,6 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
         if changes:
             props.update(_orig_props)
 
-    # Test the recursive behaviour of content_status_modify and folder_publish:
-
     def testPublishingSubobjects(self):
         self.setRoles(['Manager'])  # Make sure we can publish directly
         self.folder.invokeFactory('Document', id='d1', title='Doc 1')
@@ -149,6 +147,114 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
         for o in (self.folder.f1.d2, self.folder.f1.f2):
             self.assertEqual(self.workflow.getInfoFor(o, 'review_state'),
                              'visible')
+
+    def testFolderPublishing(self):
+        # Make sure object gets published
+        self.setRoles(['Manager'])
+        self.folder.invokeFactory('Document', id='doc1')
+        doc1 = self.folder.doc1
+        doc_path = '/'.join(doc1.getPhysicalPath())
+        self.setRequestMethod('POST')
+        self.folder.restrictedTraverse('@@folder_publish')(
+            workflow_action='publish',
+            paths=[doc_path])
+        wtool = self.portal.portal_workflow
+        review_state = wtool.getInfoFor(doc1, 'review_state')
+        self.assertEqual(review_state, 'published')
+
+    def testCatalogIsUpdatedOnFolderPublish(self):
+        # Make sure catalog gets updated
+        self.folder.invokeFactory('Document', id='doc1')
+        doc1 = self.folder.doc1
+        doc_path = '/'.join(doc1.getPhysicalPath())
+        self.setRequestMethod('POST')
+        self.setRoles(['Manager'])
+        self.folder.unrestrictedTraverse('@@folder_publish')(
+            workflow_action='publish',
+            paths=[doc_path])
+        results = self.portal.portal_catalog(path=doc_path)
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].review_state, 'published')
+
+    def testNoErrorOnBadPaths(self):
+        # Ensure we don't fail on a bad path, but transition the good ones
+        wtool = self.portal.portal_workflow
+        self.folder.invokeFactory('Document', 'doc1')
+        self.folder.invokeFactory('Document', 'doc2')
+        doc1_path = '/'.join(self.folder.doc1.getPhysicalPath())
+        doc2_path = '/'.join(self.folder.doc2.getPhysicalPath())
+        paths = [doc1_path, '/garbage/path', doc2_path]
+        self.setupAuthenticator()
+        self.setRequestMethod('POST')
+        self.setRoles(['Manager'])
+        self.folder.unrestrictedTraverse('@@folder_publish')(
+            workflow_action='publish',
+            paths=paths)
+        self.assertEqual(wtool.getInfoFor(self.folder.doc1,
+                                          'review_state', None),
+                         'published')
+        self.assertEqual(wtool.getInfoFor(self.folder.doc2,
+                                          'review_state', None),
+                         'published')
+
+    def testPublishFailureIsCleanedUp(self):
+        # Ensure we don't fail on a bad path, but transition the good ones
+
+        # First we add a failing notifySuccess method to the workflow
+        # via a nasty monkey-patch
+        from Products.DCWorkflow.DCWorkflow import DCWorkflowDefinition
+
+        def notifySuccess(self, obj, action, result):
+            raise Exception('Cannot transition')
+        orig_notify = DCWorkflowDefinition.notifySuccess
+        DCWorkflowDefinition.notifySuccess = notifySuccess
+
+        # now we perform the transition
+        self.folder.invokeFactory('Document', 'doc1')
+        doc1_path = '/'.join(self.folder.doc1.getPhysicalPath())
+        self.setRequestMethod('POST')
+        self.setupAuthenticator()
+        self.setRoles(['Manager'])
+        self.folder.unrestrictedTraverse('@@folder_publish')(
+            workflow_action='publish',
+            paths=[doc1_path])
+        # because an error was raised during post transition the
+        # transaction should have been rolled-back and the state
+        # should not have changed
+        self.assertNotEqual(self.portal.portal_workflow.getInfoFor(
+            self.folder.doc1, 'review_state', None), 'published')
+
+        # undo our nasty patch
+        DCWorkflowDefinition.notifySuccess = orig_notify
+
+    def testPublishMultiplePaths(self):
+        # Make sure publish works for list of paths
+        wtool = self.portal.portal_workflow
+        self.folder.invokeFactory('Document', 'doc1')
+        self.folder.invokeFactory('Document', 'doc2')
+        doc1_path = '/'.join(self.folder.doc1.getPhysicalPath())
+        doc2_path = '/'.join(self.folder.doc2.getPhysicalPath())
+        self.setRequestMethod('POST')
+        self.setupAuthenticator()
+        self.setRoles(['Manager'])
+        self.folder.unrestrictedTraverse('@@folder_publish')(
+            workflow_action='publish',
+            paths=[doc1_path, doc2_path])
+        self.assertEqual(
+            wtool.getInfoFor(self.folder.doc1, 'review_state', None),
+            'published')
+        self.assertEqual(
+            wtool.getInfoFor(self.folder.doc2, 'review_state', None),
+            'published')
+
+    def testGETRaises(self):
+        # folder_rename requires a non-GET request and will fail otherwise
+        from zExceptions import Forbidden
+        self.setRequestMethod('GET')
+        with self.assertRaises(Forbidden):
+            self.folder.unrestrictedTraverse('@@folder_publish')(
+                workflow_action='publish',
+                paths=['bogus'])
 
     def testPublishingNonDefaultPageLeavesFolderAlone(self):
         self.setRoles(['Manager'])  # Make sure we can publish directly
@@ -220,7 +326,6 @@ class TestContentPublishing(PloneTestCase.PloneTestCase):
         self.folder.d1.restrictedTraverse('content_status_modify')(
             workflow_action='publish')
         self.assertFalse(self.folder.d1.isExpired())
-
 
 setupPloneSite()
 
