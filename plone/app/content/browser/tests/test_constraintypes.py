@@ -28,56 +28,56 @@ class TestConstrainTypes(unittest.TestCase):
 
     def test_constraintypes_form_save(self):
         self._open_form()
-        cancel_button = self.browser.getControl(name="form.button.Save")
+        cancel_button = self.browser.getControl("Save")
         cancel_button.click()
         self.assertTrue(self.browser.url == self.folder.absolute_url())
 
     def test_constraintypes_form_cancel(self):
         self._open_form()
-        cancel_button = self.browser.getControl(name="form.button.Cancel")
+        cancel_button = self.browser.getControl("Cancel")
         cancel_button.click()
         self.assertTrue(self.browser.url == self.folder.absolute_url())
 
     def test_enable_manually(self):
         self._open_form()
-        self.browser.getControl(name="constrainTypesMode:int").getControl(
-            value='1').click()
-        self.browser.getControl(name="form.button.Save").click()
+        self.browser.getControl(
+            name="form.widgets.constrain_types_mode:list").value = ['1']
+        self.browser.getControl("Save").click()
         self._open_form()
-        self.assertTrue(self.browser.getControl(name="constrainTypesMode:int")
-            .getControl(value='1').selected)
+        self.assertEquals(['1'], self.browser.getControl(
+            name="form.widgets.constrain_types_mode:list").value)
 
     def test_preferred_types(self):
         self._open_form()
-        self.browser.getControl(name="constrainTypesMode:int").getControl(
-            value='1').click()
-        self.browser.getControl(name="currentPrefer:list").getControl(
-            value="Document").click()
-        self.browser.getControl(name="form.button.Save").click()
+        self.browser.getControl(
+            name="form.widgets.constrain_types_mode:list").value = ['1']
+        self.browser.getControl(
+            name="form.widgets.current_prefer:list").value = ["Document"]
+        self.browser.getControl("Save").click()
         self._open_form()
-        self.assertFalse(self.browser.getControl(name="currentPrefer:list")
-            .getControl(value="Document").selected)
+        self.assertEquals(["Document"], self.browser.getControl(
+            name="form.widgets.current_prefer:list").value)
 
     def test_locally_allowed_types(self):
         self._open_form()
-        self.browser.getControl(name="constrainTypesMode:int").getControl(
-            value='1').click()
-        self.browser.getControl(name="currentAllow:list").getControl(
-            value="Document").click()
-        self.browser.getControl(name="form.button.Save").click()
+        self.browser.getControl(
+            name="form.widgets.current_allow:list").value = ["Document"]
+        self.browser.getControl(
+            name="form.widgets.constrain_types_mode:list").value = ["1"]
+        self.browser.getControl("Save").click()
         self._open_form()
-        self.assertTrue(self.browser.getControl(name="currentAllow:list")
-            .getControl(value="Document").selected)
+        self.assertEquals(["Document"], self.browser.getControl(
+            name="form.widgets.current_allow:list").value)
 
     def test_preferred_not_allowed(self):
         self._open_form()
-        self.browser.getControl(name="constrainTypesMode:int").getControl(
-            value='1').click()
-        self.browser.getControl(name="currentPrefer:list").getControl(
-            value="Document").click()
-        self.browser.getControl(name="currentAllow:list").getControl(
-            value="Document").click()
-        self.browser.getControl(name="form.button.Save").click()
+        self.browser.getControl(
+            name="form.widgets.constrain_types_mode:list").value = ["1"]
+        self.browser.getControl(
+            name="form.widgets.current_prefer:list").value = ["Document"]
+        self.browser.getControl(
+            name="form.widgets.current_allow:list").value = ["Folder"]
+        self.browser.getControl("Save").click()
         self.assertTrue(self.browser.url == '%s/@@folder_constraintypes_form'
                         % self.folder.absolute_url())
         self.assertIn('You cannot have a type as secondary type without having'

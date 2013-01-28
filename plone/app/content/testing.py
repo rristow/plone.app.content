@@ -1,11 +1,13 @@
+# -*- coding: utf-8 -*-
 from Products.CMFCore.utils import getToolByName
 
-from plone.app.testing import PloneSandboxLayer
-from plone.app.testing import PLONE_FIXTURE
-from plone.app.testing import IntegrationTesting
 from plone.app.testing import FunctionalTesting
+from plone.app.testing import IntegrationTesting
+from plone.app.testing import PLONE_FIXTURE
+from plone.app.testing import PloneSandboxLayer
 
 from zope.configuration import xmlconfig
+
 
 
 class PloneAppContent(PloneSandboxLayer):
