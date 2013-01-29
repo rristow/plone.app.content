@@ -4,7 +4,12 @@ Changelog
 2.1 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Reimplement the constraintypes form with z3c.form.
+  [do3cc]
+
+- Add provides marker to allow other packages provide features
+  when this package with plip 13260 implementation is available
+  [do3cc]
 
 
 2.1a2 (2012-10-16)

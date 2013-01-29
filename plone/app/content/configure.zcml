@@ -1,10 +1,13 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
     xmlns:five="http://namespaces.zope.org/five"
+    xmlns:meta="http://namespaces.zope.org/meta"
     xmlns:plone="http://namespaces.plone.org/plone">
 
     <include file="permissions.zcml" />
     <include package=".browser" />
+
+    <meta:provides feature="plone.app.form-plip13260" />
 
     <!-- Register a name chooser that chooses plone-like normalized names -->
     <adapter
