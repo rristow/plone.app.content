@@ -52,31 +52,31 @@ class TestConstrainTypes(unittest.TestCase):
         self.browser.getControl(
             name="form.widgets.constrain_types_mode:list").value = ['1']
         self.browser.getControl(
-            name="form.widgets.current_prefer:list").value = ["Document"]
+            name="form.widgets.allow:list").value = ["Document"]
         self.browser.getControl("Save").click()
         self._open_form()
         self.assertEquals(["Document"], self.browser.getControl(
-            name="form.widgets.current_prefer:list").value)
+            name="form.widgets.allow:list").value)
 
     def test_locally_allowed_types(self):
         self._open_form()
         self.browser.getControl(
-            name="form.widgets.current_allow:list").value = ["Document"]
+            name="form.widgets.allow_2nd_step:list").value = ["Document"]
         self.browser.getControl(
             name="form.widgets.constrain_types_mode:list").value = ["1"]
         self.browser.getControl("Save").click()
         self._open_form()
         self.assertEquals(["Document"], self.browser.getControl(
-            name="form.widgets.current_allow:list").value)
+            name="form.widgets.allow_2nd_step:list").value)
 
     def test_preferred_not_allowed(self):
         self._open_form()
         self.browser.getControl(
             name="form.widgets.constrain_types_mode:list").value = ["1"]
         self.browser.getControl(
-            name="form.widgets.current_prefer:list").value = ["Document"]
+            name="form.widgets.allow:list").value = ["Document"]
         self.browser.getControl(
-            name="form.widgets.current_allow:list").value = ["Folder"]
+            name="form.widgets.allow_2nd_step:list").value = ["Folder"]
         self.browser.getControl("Save").click()
         self.assertTrue(self.browser.url == '%s/@@folder_constraintypes_form'
                         % self.folder.absolute_url())

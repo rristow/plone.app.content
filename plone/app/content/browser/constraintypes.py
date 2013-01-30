@@ -53,7 +53,7 @@ class IConstrainForm(Interface):
         vocabulary=possible_constrain_types
     )
 
-    current_prefer = List(
+    allow = List(
         title=PC_("label_immediately_addable_types", default="Allowed types"),
         description=PC_("help_immediately_addable_types",
                         default="Controls what types are addable "
@@ -62,7 +62,7 @@ class IConstrainForm(Interface):
             source="plone.app.content.browser.constraintypes.validtypes"),
     )
 
-    current_allow = List(
+    allow_2nd_step = List(
         title=PC_("label_locally_allowed_types", default="Secondary types"),
         description=PC_("help_locally_allowed_types", default=""
                         "Select which types should be available in the "
@@ -80,9 +80,9 @@ class IConstrainForm(Interface):
     @invariant
     def legal_not_immediately_addable(data):
         missing = []
-        for one_allowed in data.current_allow:
-            if one_allowed not in data.current_prefer:
-                missing.append(one_allowed)
+        for one_allowed_2nd_step in data.allow_2nd_step:
+            if one_allowed_2nd_step not in data.allow:
+                missing.append(one_allowed_2nd_step)
         if missing:
             raise Invalid(
                 PC_("You cannot have a type as secondary type without "
@@ -109,21 +109,21 @@ class FormContentAdapter(object):
         self.context.setConstrainTypesMode(value)
 
     @property
-    def current_prefer(self):
+    def allow(self):
         return self.context.getLocallyAllowedTypes()
 
-    @current_prefer.setter
-    def current_prefer(self, value):
+    @allow.setter
+    def allow(self, value):
         self.context.setLocallyAllowedTypes(value)
 
     @property
-    def current_allow(self):
+    def allow_2nd_step(self):
         immediately_allowed = self.context.getImmediatelyAddableTypes()
         return [t for t in self.context.getLocallyAllowedTypes()
                 if t not in immediately_allowed]
 
-    @current_allow.setter
-    def current_allow(self, value):
+    @allow_2nd_step.setter
+    def allow_2nd_step(self, value):
         locally_allowed = self.context.getLocallyAllowedTypes()
         self.context.setImmediatelyAddableTypes([t for t in locally_allowed
                                                  if t not in value])
@@ -155,13 +155,13 @@ class ConstrainTypesView(AutoExtensibleForm, form.EditForm):
 
     def updateFields(self):
         super(ConstrainTypesView, self).updateFields()
-        self.fields['current_prefer'].widgetFactory = CheckBoxFieldWidget
-        self.fields['current_allow'].widgetFactory = CheckBoxFieldWidget
+        self.fields['allow'].widgetFactory = CheckBoxFieldWidget
+        self.fields['allow_2nd_step'].widgetFactory = CheckBoxFieldWidget
 
     def updateWidgets(self):
         super(ConstrainTypesView, self).updateWidgets()
-        self.widgets['current_prefer'].addClass('current_prefer_form')
-        self.widgets['current_allow'].addClass('current_allow_form')
+        self.widgets['allow'].addClass('allow_form')
+        self.widgets['allow_2nd_step'].addClass('allow_2nd_step_form')
         self.widgets['constrain_types_mode'].addClass(
             'constrain_types_mode_form')
 
@@ -177,9 +177,9 @@ class ConstrainTypesView(AutoExtensibleForm, form.EditForm):
         if errors:
             return
 
-        immediately_addable_types = [t for t in data['current_prefer']
-                                     if t not in data['current_allow']]
-        locally_allowed_types = data['current_prefer']
+        immediately_addable_types = [t for t in data['allow']
+                                     if t not in data['allow_2nd_step']]
+        locally_allowed_types = data['allow']
         aspect = ISelectableConstrainTypes(self.context)
         aspect.setConstrainTypesMode(data['constrain_types_mode'])
         aspect.setLocallyAllowedTypes(locally_allowed_types)

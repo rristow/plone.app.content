@@ -47,14 +47,14 @@ class ConstrainsIntegrationTest(unittest.TestCase):
 
     def test_formschemainvariants(self):
         class Data(object):
-            current_prefer = []
-            current_allow = []
+            allow = []
+            allow_2nd_step = []
         bad = Data()
-        bad.current_prefer = []
-        bad.current_allow = ['1']
+        bad.allow = []
+        bad.allow_2nd_step = ['1']
         good = Data()
-        good.current_prefer = ['1']
-        good.current_allow = []
+        good.allow = ['1']
+        good.allow_2nd_step = []
         self.assertTrue(IConstrainForm.validateInvariants(good) is None)
         self.assertRaises(Invalid, IConstrainForm.validateInvariants, bad)
 
@@ -69,8 +69,8 @@ class ConstrainsIntegrationTest(unittest.TestCase):
         adapter = IConstrainForm(aspect)
 
         aspect.setConstrainTypesMode(constraintypes.ENABLED)
-        adapter.current_prefer = ["Document", "Folder"]
-        adapter.current_allow = ["Document"]
+        adapter.allow = ["Document", "Folder"]
+        adapter.allow_2nd_step = ["Document"]
 
 
         self.assertEquals(["Document", "Folder"],
@@ -78,11 +78,11 @@ class ConstrainsIntegrationTest(unittest.TestCase):
         self.assertEquals(["Folder"],
                           list(aspect.getImmediatelyAddableTypes()))
 
-        self.assertEquals(["Document", "Folder"], list(adapter.current_prefer))
-        self.assertEquals(["Document"], list(adapter.current_allow))
+        self.assertEquals(["Document", "Folder"], list(adapter.allow))
+        self.assertEquals(["Document"], list(adapter.allow_2nd_step))
 
-        adapter.current_prefer = ["Document"]
-        adapter.current_allow = ["Document", "Folder"]
+        adapter.allow = ["Document"]
+        adapter.allow_2nd_step = ["Document", "Folder"]
 
         self.assertEquals(["Document"], list(aspect.getLocallyAllowedTypes()))
         self.assertEquals([], list(aspect.getImmediatelyAddableTypes()))
@@ -120,15 +120,15 @@ class FolderConstrainViewFunctionalText(unittest.TestCase):
         self.assertTrue("Restrict what types" in self.browser.contents)
         self.assertTrue("// Custom form constraints for constrain form" in
                         self.browser.contents)
-        self.assertTrue("current_prefer_form" in self.browser.contents)
+        self.assertTrue("allow_form" in self.browser.contents)
 
     def test_form_save_restrictions(self):
         self.browser.open(self.folder_url)
         self.browser.getLink('Restrictions').click()
         ctrl = lambda name: self.browser.getControl(name=name)
         self.browser.getControl("Type restrictions").value = ['1']
-        ctrl("form.widgets.current_prefer:list").value = ["Document", "Folder"]
-        ctrl("form.widgets.current_allow:list").value = ["Document"]
+        ctrl("form.widgets.allow:list").value = ["Document", "Folder"]
+        ctrl("form.widgets.allow_2nd_step:list").value = ["Document"]
         self.browser.getControl("Save").click()
         aspect = ISelectableConstrainTypes(self.folder)
         self.assertEquals(1, aspect.getConstrainTypesMode())
@@ -147,8 +147,8 @@ class FolderConstrainViewFunctionalText(unittest.TestCase):
         self.browser.getLink('Restrictions').click()
         ctrl = lambda name: self.browser.getControl(name=name)
         self.browser.getControl("Type restrictions").value = ['1']
-        ctrl("form.widgets.current_prefer:list").value = ["Document"]
-        ctrl("form.widgets.current_allow:list").value = ["Document", "Folder"]
+        ctrl("form.widgets.allow:list").value = ["Document"]
+        ctrl("form.widgets.allow_2nd_step:list").value = ["Document", "Folder"]
         self.browser.getControl("Save").click()
         self.assertEquals(constraint_before, aspect.getConstrainTypesMode())
         self.assertTrue('Error' in self.browser.contents)

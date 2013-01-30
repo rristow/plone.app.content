@@ -11,39 +11,39 @@
               (function($){
                 // Custom form constraints for constrain form
                 $(document).ready(function(){
-                  var prefered = $(".current_prefer_form"),
-                      allowed = $(".current_allow_form"),
+                  var allowed = $(".allow_form"),
+                      allowed_2nd_step = $(".allow_2nd_step_form"),
                       constrain_mode = $(".constrain_types_mode_form"),
-                      prefered_field = prefered.parents('.field'),
                       allowed_field = allowed.parents('.field'),
+                      allowed_2nd_step_field = allowed_2nd_step.parents('.field'),
                       ACQUIRE = -1,
                       DISABLED = 0,
                       ENABLED = 1;
                   function updateVisibility(){
                     var mode = constrain_mode.val();
                     if(mode == ENABLED){
-                      prefered_field.show();
                       allowed_field.show();
+                      allowed_2nd_step_field.show();
                     }else{
-                      prefered_field.hide();
                       allowed_field.hide();
+                      allowed_2nd_step_field.hide();
                     }
                   }
                   function updateSelectable(){
-                    prefered.each(function(){
-                      var allowed_id = this.id.replace('prefer', 'allow'),
-                          allowed_item = allowed_field.find("#" + allowed_id);
+                    allowed.each(function(){
+                      var allowed_2nd_step_id = this.id.replace('allow', 'allow_2nd_step'),
+                          allowed_2nd_step_item = allowed_2nd_step_field.find("#" + allowed_2nd_step_id);
                       if (this.checked){
-                        allowed_item[0].disabled = false;
+                        allowed_2nd_step_item[0].disabled = false;
                       }else{
-                        allowed_item[0].disabled = true;
-                        allowed_item[0].checked = false;
+                        allowed_2nd_step_item[0].disabled = true;
+                        allowed_2nd_step_item[0].checked = false;
                       }
                     });
                   }
                   constrain_mode.change(updateVisibility);
                   updateVisibility();
-                  prefered_field.change(updateSelectable);
+                  allowed_field.change(updateSelectable);
                   updateSelectable();
                 })
               }(jQuery));
