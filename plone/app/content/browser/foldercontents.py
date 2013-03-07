@@ -113,7 +113,6 @@ class FolderContentsTable(object):
         context = aq_inner(self.context)
         plone_utils = getToolByName(context, 'plone_utils')
         plone_view = getMultiAdapter((context, self.request), name=u'plone')
-        plone_layout = getMultiAdapter((context, self.request), name=u'plone_layout')
         portal_workflow = getToolByName(context, 'portal_workflow')
         portal_properties = getToolByName(context, 'portal_properties')
         portal_types = getToolByName(context, 'portal_types')
@@ -136,9 +135,8 @@ class FolderContentsTable(object):
 
             # avoid creating unnecessary info for items outside the current
             # batch;  only the path is needed for the "select all" case...
-            # Include brain to make customizations easier (see comment below)
             if not show_all and not start <= i < end:
-                results.append(dict(path=path, brain=obj))
+                results.append(dict(path = path))
                 continue
 
             if (i + 1) % 2 == 0:
@@ -147,12 +145,16 @@ class FolderContentsTable(object):
                 table_row_class = "draggable odd"
 
             url = obj.getURL()
-            icon = plone_layout.getIcon(obj)
+            icon = plone_view.getIcon(obj);
             type_class = 'contenttype-' + plone_utils.normalizeString(
                 obj.portal_type)
 
             review_state = obj.review_state
             state_class = 'state-' + plone_utils.normalizeString(review_state)
+            # + FHNW patch
+            if getattr(obj, 'exclude_from_nav', False):
+                state_class += ' excluded_from_nav'
+            # - FHNW patch
             relative_url = obj.getURL(relative=True)
 
             fti = portal_types.get(obj.portal_type)
@@ -166,10 +168,9 @@ class FolderContentsTable(object):
 
             modified = plone_view.toLocalizedTime(
                 obj.ModificationDate, long_format=1)
-            modified_sortable = 'sortabledata-' + obj.modified.strftime(
-                '%Y-%m-%d-%H-%M-%S')
 
-            if obj.portal_type in use_view_action:
+            obj_type = obj.Type
+            if obj_type in use_view_action:
                 view_url = url + '/view'
             elif obj.is_folderish:
                 view_url = url + "/folder_contents"
@@ -180,27 +181,20 @@ class FolderContentsTable(object):
                 obj.id == browser_default[1][0])
 
             results.append(dict(
-                # provide the brain itself to allow cleaner customisation of
-                # the view.
-                #
-                # this doesn't add any memory overhead, a reference to
-                # the brain is already kept through its getPath bound method.
-                brain = obj,
                 url = url,
                 url_href_title = url_href_title,
-                id = obj.getId,
+                id  = obj.getId,
                 quoted_id = urllib.quote_plus(obj.getId),
                 path = path,
                 title_or_id = safe_unicode(pretty_title_or_id(plone_utils, obj)),
-                obj_type = obj.Type,
+                obj_type = obj_type,
                 size = obj.getObjSize,
                 modified = modified,
-                modified_sortable = modified_sortable,
                 icon = icon.html_tag(),
                 type_class = type_class,
                 wf_state = review_state,
                 state_title = portal_workflow.getTitleForStateOnType(review_state,
-                                                                 obj.portal_type),
+                                                                     obj_type),
                 state_class = state_class,
                 is_browser_default = is_browser_default,
                 folderish = obj.is_folderish,
