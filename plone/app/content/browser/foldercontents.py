@@ -155,6 +155,12 @@ class FolderContentsTable(object):
             state_class = 'state-' + plone_utils.normalizeString(review_state)
             relative_url = obj.getURL(relative=True)
 
+            # + FHNW patch
+            if getattr(obj, 'exclude_from_nav', False):
+                state_class += ' excluded_from_nav'
+                table_row_class+= ' excluded_from_nav'
+            # - FHNW patch
+
             fti = portal_types.get(obj.portal_type)
             if fti is not None:
                 type_title_msgid = fti.Title()
